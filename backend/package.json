@@ -1,0 +1,28 @@
+{
+  "name": "fiscal-flow-backend",
+  "version": "1.0.0",
+  "description": "Backend API for FiscalFlow personal finance dashboard",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "node src/utils/seed.js",
+    "db:reset": "prisma migrate reset --force"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "@prisma/client": "^5.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "prisma": "^5.6.0"
+  },
+  "keywords": ["finance", "dashboard", "api"],
+  "author": "",
+  "license": "MIT"
+}

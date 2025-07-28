@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String @id @default(cuid())
+  email       String @unique
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  mutualFunds   MutualFund[]
+  fixedDeposits FixedDeposit[]
+  epfAccounts   EPFAccount[]
+  stocks        Stock[]
+  sips          SIP[]
+  
+  @@map("users")
+}
+
+model MutualFund {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  category       String
+  riskLevel      String
+  rating         Int
+  investedAmount Float
+  currentValue   Float    @default(0)
+  cagr           Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("mutual_funds")
+}
+
+model FixedDeposit {
+  id             String   @id @default(cuid())
+  userId         String
+  bankName       String
+  interestRate   Float
+  type           String
+  investedAmount Float
+  currentValue   Float
+  maturityAmount Float
+  startDate      DateTime
+  maturityDate   DateTime
+  tenure         Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([maturityDate])
+  @@map("fixed_deposits")
+}
+
+model EPFAccount {
+  id                   String    @id @default(cuid())
+  userId               String
+  employerName         String
+  pfNumber             String
+  status               String
+  totalBalance         Float
+  employeeContribution Float
+  employerContribution Float
+  pensionFund          Float
+  monthlyContribution  Float
+  startDate            DateTime
+  endDate              DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@map("epf_accounts")
+}
+
+model Stock {
+  id             String   @id @default(cuid())
+  userId         String
+  symbol         String
+  companyName    String
+  sector         String
+  marketCap      String
+  quantity       Int
+  buyPrice       Float
+  currentPrice   Float    @default(0)
+  investedAmount Float
+  currentValue   Float    @default(0)
+  pnl            Float    @default(0)
+  pnlPercentage  Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([symbol])
+  @@index([sector])
+  @@map("stocks")
+}
+
+model SIP {
+  id                    String   @id @default(cuid())
+  userId                String
+  fundName              String
+  amount                Float
+  frequency             String
+  nextDueDate           DateTime
+  totalInstallments     Int
+  completedInstallments Int      @default(0)
+  status                String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([nextDueDate])
+  @@index([status])
+  @@map("sips")
+}
