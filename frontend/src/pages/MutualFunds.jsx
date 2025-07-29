@@ -108,7 +108,10 @@ export const MutualFunds = observer(() => {
             <TabsTrigger value="sips">Active SIPs</TabsTrigger>
           </TabsList>
           
-          <Button onClick={() => activeTab === 'funds' ? setShowAddFundModal(true) : setShowAddSIPModal(true)}>
+          <Button 
+            data-tour="add-button"
+            onClick={() => activeTab === 'funds' ? setShowAddFundModal(true) : setShowAddSIPModal(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             {activeTab === 'funds' ? 'Add Fund' : 'Add SIP'}
           </Button>

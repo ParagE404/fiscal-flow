@@ -58,10 +58,13 @@ export function Sidebar({ isOpen, onToggle }) {
       )}
       
       {/* Sidebar */}
-      <div className={cn(
-        "fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-border transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div 
+        data-tour="sidebar"
+        className={cn(
+          "fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-border transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center space-x-2">
@@ -90,6 +93,7 @@ export function Sidebar({ isOpen, onToggle }) {
               <NavLink
                 key={item.name}
                 to={item.href}
+                data-tour={item.name === 'Settings' ? 'settings-nav' : undefined}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",

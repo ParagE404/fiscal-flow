@@ -4,8 +4,6 @@ const { formatIndianCurrency, formatPercentage, formatPnL } = require('../utils/
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
 
 /**
  * Get all stocks with summary calculations
@@ -13,10 +11,10 @@ const DEFAULT_USER_ID = 'default-user'
 const getAllStocks = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const stocks = await prisma.stock.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' }
     })
 
@@ -108,7 +106,7 @@ const getStockById = async (req, res, next) => {
     const stock = await prisma.stock.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -150,11 +148,11 @@ const getStockById = async (req, res, next) => {
 const createStock = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const stockData = {
       ...req.body,
-      userId: DEFAULT_USER_ID
+      userId: req.user.id
     }
 
     // Calculate invested amount if not provided
@@ -203,7 +201,7 @@ const updateStock = async (req, res, next) => {
     const existingStock = await prisma.stock.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -262,7 +260,7 @@ const deleteStock = async (req, res, next) => {
     const existingStock = await prisma.stock.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -294,13 +292,13 @@ const deleteStock = async (req, res, next) => {
  */
 const ensureDefaultUser = async () => {
   const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
+    where: { id: req.user.id }
   })
 
   if (!existingUser) {
     await prisma.user.create({
       data: {
-        id: DEFAULT_USER_ID,
+        id: req.user.id,
         email: 'default@fiscalflow.com',
         name: 'Default User'
       }

@@ -9,8 +9,6 @@ const { formatIndianCurrency, formatDisplayDate, formatDuration } = require('../
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
 
 /**
  * Get all fixed deposits with summary calculations
@@ -18,10 +16,10 @@ const DEFAULT_USER_ID = 'default-user'
 const getAllFixedDeposits = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const fixedDeposits = await prisma.fixedDeposit.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId: req.user.id },
       orderBy: { maturityDate: 'asc' }
     })
 
@@ -99,7 +97,7 @@ const getFixedDepositById = async (req, res, next) => {
     const fixedDeposit = await prisma.fixedDeposit.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -146,11 +144,11 @@ const getFixedDepositById = async (req, res, next) => {
 const createFixedDeposit = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const fdData = {
       ...req.body,
-      userId: DEFAULT_USER_ID
+      userId: req.user.id
     }
 
     // Calculate current value based on type and elapsed time
@@ -183,7 +181,7 @@ const updateFixedDeposit = async (req, res, next) => {
     const existingFD = await prisma.fixedDeposit.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -265,7 +263,7 @@ const deleteFixedDeposit = async (req, res, next) => {
     const existingFD = await prisma.fixedDeposit.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -297,13 +295,13 @@ const deleteFixedDeposit = async (req, res, next) => {
  */
 const ensureDefaultUser = async () => {
   const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
+    where: { id: req.user.id }
   })
 
   if (!existingUser) {
     await prisma.user.create({
       data: {
-        id: DEFAULT_USER_ID,
+        id: req.user.id,
         email: 'default@fiscalflow.com',
         name: 'Default User'
       }

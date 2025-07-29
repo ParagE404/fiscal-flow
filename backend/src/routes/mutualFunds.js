@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const mutualFundsController = require('../controllers/mutualFundsController')
 const { validate, schemas } = require('../middleware/validation')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All mutual funds routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // GET /api/mutual-funds - Get all mutual funds with summary
 router.get('/', mutualFundsController.getAllMutualFunds)

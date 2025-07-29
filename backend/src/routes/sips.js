@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const sipsController = require('../controllers/sipsController')
 const { validate, schemas } = require('../middleware/validation')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All SIPs routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // GET /api/sips - Get all SIPs with summary
 router.get('/', sipsController.getAllSIPs)

@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const epfController = require('../controllers/epfController')
 const { validate, schemas } = require('../middleware/validation')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All EPF routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // GET /api/epf - Get all EPF accounts with summary
 router.get('/', epfController.getAllEPFAccounts)

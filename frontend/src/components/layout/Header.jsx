@@ -1,9 +1,12 @@
 import React from 'react'
-import { Menu, Bell, User } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
+import { Menu, Bell, User, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useAuthStore } from '@/stores/StoreContext'
 
-export function Header({ onMenuToggle, title, subtitle }) {
+export const Header = observer(({ onMenuToggle, title, subtitle }) => {
+  const authStore = useAuthStore()
   return (
     <header className="bg-white border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -46,12 +49,33 @@ export function Header({ onMenuToggle, title, subtitle }) {
             </Badge>
           </Button>
 
-          {/* User profile */}
-          <Button variant="ghost" size="icon">
-            <User className="w-5 h-5" />
-          </Button>
+          {/* User profile with verification status */}
+          <div className="flex items-center space-x-2">
+            {authStore.isAuthenticated && (
+              <div className="hidden sm:flex items-center space-x-2">
+                {authStore.isEmailVerified ? (
+                  <div className="flex items-center space-x-1 text-green-600">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-xs font-medium">Verified</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-1 text-orange-600">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-xs font-medium">Unverified</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <Button variant="ghost" size="icon" className="relative">
+              <User className="w-5 h-5" />
+              {authStore.needsEmailVerification && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white"></div>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </header>
   )
-}
+})

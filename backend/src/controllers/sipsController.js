@@ -3,8 +3,6 @@ const { formatIndianCurrency, formatDisplayDate, formatDuration } = require('../
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
 
 /**
  * Calculate next due date based on frequency
@@ -38,10 +36,10 @@ const calculateNextDueDate = (currentDate, frequency) => {
 const getAllSIPs = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const sips = await prisma.sIP.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId: req.user.id },
       orderBy: { nextDueDate: 'asc' }
     })
 
@@ -108,7 +106,7 @@ const getSIPById = async (req, res, next) => {
     const sip = await prisma.sIP.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -154,11 +152,11 @@ const getSIPById = async (req, res, next) => {
 const createSIP = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const sipData = {
       ...req.body,
-      userId: DEFAULT_USER_ID
+      userId: req.user.id
     }
 
     const sip = await prisma.sIP.create({
@@ -188,7 +186,7 @@ const updateSIP = async (req, res, next) => {
     const existingSIP = await prisma.sIP.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -234,7 +232,7 @@ const updateSIPStatus = async (req, res, next) => {
     const existingSIP = await prisma.sIP.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -325,7 +323,7 @@ const deleteSIP = async (req, res, next) => {
     const existingSIP = await prisma.sIP.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -357,13 +355,13 @@ const deleteSIP = async (req, res, next) => {
  */
 const ensureDefaultUser = async () => {
   const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
+    where: { id: req.user.id }
   })
 
   if (!existingUser) {
     await prisma.user.create({
       data: {
-        id: DEFAULT_USER_ID,
+        id: req.user.id,
         email: 'default@fiscalflow.com',
         name: 'Default User'
       }

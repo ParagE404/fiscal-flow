@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { EmailVerificationBanner } from '../common/EmailVerificationBanner'
 
 // Page titles mapping
 const pageTitles = {
@@ -33,6 +34,9 @@ export function Layout() {
       
       {/* Main content */}
       <div className="lg:ml-64">
+        {/* Email verification banner */}
+        <EmailVerificationBanner />
+        
         {/* Header */}
         <Header 
           onMenuToggle={toggleSidebar}

@@ -4,19 +4,15 @@ const { formatIndianCurrency, formatPercentage } = require('../utils/formatting'
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
+// Authentication is now implemented - use req.user.id
 
 /**
  * Get all mutual funds with summary calculations
  */
 const getAllMutualFunds = async (req, res, next) => {
   try {
-    // Ensure default user exists
-    await ensureDefaultUser()
-
     const mutualFunds = await prisma.mutualFund.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' }
     })
 
@@ -60,7 +56,7 @@ const getMutualFundById = async (req, res, next) => {
     const mutualFund = await prisma.mutualFund.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -88,12 +84,9 @@ const getMutualFundById = async (req, res, next) => {
  */
 const createMutualFund = async (req, res, next) => {
   try {
-    // Ensure default user exists
-    await ensureDefaultUser()
-
     const mutualFundData = {
       ...req.body,
-      userId: DEFAULT_USER_ID
+      userId: req.user.id
     }
 
     // Calculate initial CAGR if currentValue is provided and different from investedAmount
@@ -129,7 +122,7 @@ const updateMutualFund = async (req, res, next) => {
     const existingFund = await prisma.mutualFund.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -185,7 +178,7 @@ const deleteMutualFund = async (req, res, next) => {
     const existingFund = await prisma.mutualFund.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -212,24 +205,7 @@ const deleteMutualFund = async (req, res, next) => {
   }
 }
 
-/**
- * Ensure default user exists for MVP
- */
-const ensureDefaultUser = async () => {
-  const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
-  })
-
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
-        id: DEFAULT_USER_ID,
-        email: 'default@fiscalflow.com',
-        name: 'Default User'
-      }
-    })
-  }
-}
+// ensureDefaultUser function removed - authentication now handles user context
 
 module.exports = {
   getAllMutualFunds,

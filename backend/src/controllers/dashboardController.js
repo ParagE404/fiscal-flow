@@ -8,19 +8,15 @@ const { formatIndianCurrency, formatPercentage } = require('../utils/formatting'
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
+// Authentication is now implemented - use req.user.id
 
 /**
  * Get complete dashboard overview
  */
 const getDashboardOverview = async (req, res, next) => {
   try {
-    // Ensure default user exists
-    await ensureDefaultUser()
-
     // Fetch all portfolio data
-    const portfolioData = await fetchAllPortfolioData()
+    const portfolioData = await fetchAllPortfolioData(req.user.id)
 
     // Calculate portfolio summary
     const portfolioSummary = calculatePortfolioSummary(portfolioData)
@@ -59,8 +55,7 @@ const getDashboardOverview = async (req, res, next) => {
  */
 const getPortfolioSummary = async (req, res, next) => {
   try {
-    await ensureDefaultUser()
-    const portfolioData = await fetchAllPortfolioData()
+    const portfolioData = await fetchAllPortfolioData(req.user.id)
     const portfolioSummary = calculatePortfolioSummary(portfolioData)
     const monthlyGrowth = await calculateMonthlyGrowth(portfolioData)
 
@@ -82,8 +77,7 @@ const getPortfolioSummary = async (req, res, next) => {
  */
 const getAssetAllocation = async (req, res, next) => {
   try {
-    await ensureDefaultUser()
-    const portfolioData = await fetchAllPortfolioData()
+    const portfolioData = await fetchAllPortfolioData(req.user.id)
     const assetAllocation = calculateAssetAllocation(portfolioData)
 
     res.json({
@@ -101,8 +95,7 @@ const getAssetAllocation = async (req, res, next) => {
  */
 const getTopPerformers = async (req, res, next) => {
   try {
-    await ensureDefaultUser()
-    const portfolioData = await fetchAllPortfolioData()
+    const portfolioData = await fetchAllPortfolioData(req.user.id)
     const topPerformers = calculateTopPerformers(portfolioData)
 
     res.json({
@@ -118,13 +111,13 @@ const getTopPerformers = async (req, res, next) => {
 /**
  * Fetch all portfolio data from database
  */
-const fetchAllPortfolioData = async () => {
+const fetchAllPortfolioData = async (userId) => {
   const [mutualFunds, fixedDeposits, epfAccounts, stocks, sips] = await Promise.all([
-    prisma.mutualFund.findMany({ where: { userId: DEFAULT_USER_ID } }),
-    prisma.fixedDeposit.findMany({ where: { userId: DEFAULT_USER_ID } }),
-    prisma.ePFAccount.findMany({ where: { userId: DEFAULT_USER_ID } }),
-    prisma.stock.findMany({ where: { userId: DEFAULT_USER_ID } }),
-    prisma.sIP.findMany({ where: { userId: DEFAULT_USER_ID } })
+    prisma.mutualFund.findMany({ where: { userId } }),
+    prisma.fixedDeposit.findMany({ where: { userId } }),
+    prisma.ePFAccount.findMany({ where: { userId } }),
+    prisma.stock.findMany({ where: { userId } }),
+    prisma.sIP.findMany({ where: { userId } })
   ])
 
   // Update fixed deposits with current values
@@ -262,24 +255,7 @@ const calculateTopPerformers = (portfolioData) => {
   }
 }
 
-/**
- * Ensure default user exists for MVP
- */
-const ensureDefaultUser = async () => {
-  const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
-  })
-
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
-        id: DEFAULT_USER_ID,
-        email: 'default@fiscalflow.com',
-        name: 'Default User'
-      }
-    })
-  }
-}
+// ensureDefaultUser function removed - authentication now handles user context
 
 module.exports = {
   getDashboardOverview,

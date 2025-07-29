@@ -3,8 +3,6 @@ const { formatIndianCurrency, formatDisplayDate, formatPercentage } = require('.
 
 const prisma = new PrismaClient()
 
-// For MVP, we'll use a default user ID since authentication is not implemented yet
-const DEFAULT_USER_ID = 'default-user'
 
 /**
  * Calculate EPF interest earned (simplified calculation)
@@ -40,10 +38,10 @@ const calculateContributionRate = (monthlyContribution, estimatedSalary = null) 
 const getAllEPFAccounts = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const epfAccounts = await prisma.ePFAccount.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' }
     })
 
@@ -122,7 +120,7 @@ const getEPFAccountById = async (req, res, next) => {
     const epfAccount = await prisma.ePFAccount.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -173,17 +171,17 @@ const getEPFAccountById = async (req, res, next) => {
 const createEPFAccount = async (req, res, next) => {
   try {
     // Ensure default user exists
-    await ensureDefaultUser()
+    
 
     const epfData = {
       ...req.body,
-      userId: DEFAULT_USER_ID
+      userId: req.user.id
     }
 
     // Validate PF number uniqueness for the user
     const existingPF = await prisma.ePFAccount.findFirst({
       where: {
-        userId: DEFAULT_USER_ID,
+        userId: req.user.id,
         pfNumber: epfData.pfNumber
       }
     })
@@ -244,7 +242,7 @@ const updateEPFAccount = async (req, res, next) => {
     const existingEPF = await prisma.ePFAccount.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -261,7 +259,7 @@ const updateEPFAccount = async (req, res, next) => {
     if (updateData.pfNumber && updateData.pfNumber !== existingEPF.pfNumber) {
       const existingPF = await prisma.ePFAccount.findFirst({
         where: {
-          userId: DEFAULT_USER_ID,
+          userId: req.user.id,
           pfNumber: updateData.pfNumber,
           id: { not: id }
         }
@@ -333,7 +331,7 @@ const deleteEPFAccount = async (req, res, next) => {
     const existingEPF = await prisma.ePFAccount.findFirst({
       where: { 
         id,
-        userId: DEFAULT_USER_ID 
+        userId: req.user.id 
       }
     })
 
@@ -365,13 +363,13 @@ const deleteEPFAccount = async (req, res, next) => {
  */
 const ensureDefaultUser = async () => {
   const existingUser = await prisma.user.findUnique({
-    where: { id: DEFAULT_USER_ID }
+    where: { id: req.user.id }
   })
 
   if (!existingUser) {
     await prisma.user.create({
       data: {
-        id: DEFAULT_USER_ID,
+        id: req.user.id,
         email: 'default@fiscalflow.com',
         name: 'Default User'
       }

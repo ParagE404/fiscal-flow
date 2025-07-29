@@ -8,11 +8,20 @@ datasource db {
 }
 
 model User {
-  id          String @id @default(cuid())
-  email       String @unique
-  name        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  name                  String
+  password              String
+  avatar                String?
+  isEmailVerified       Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken    String?
+  passwordResetExpires  DateTime?
+  loginAttempts         Int       @default(0)
+  lockUntil             DateTime?
+  lastLogin             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
   
   mutualFunds   MutualFund[]
   fixedDeposits FixedDeposit[]
@@ -20,6 +29,9 @@ model User {
   stocks        Stock[]
   sips          SIP[]
   
+  @@index([email])
+  @@index([emailVerificationToken])
+  @@index([passwordResetToken])
   @@map("users")
 }
 

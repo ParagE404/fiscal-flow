@@ -1,6 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const exportController = require('../controllers/exportController')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All export routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // Complete portfolio export
 router.get('/all', exportController.exportCompletePortfolio)

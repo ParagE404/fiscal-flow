@@ -1,6 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const dashboardController = require('../controllers/dashboardController')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All dashboard routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // GET /api/dashboard - Get portfolio overview with summary, asset allocation, and top performers
 router.get('/', dashboardController.getDashboardOverview)

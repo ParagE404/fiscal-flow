@@ -6,8 +6,11 @@ const { PrismaClient } = require('@prisma/client')
 // Import middleware
 const errorHandler = require('./middleware/errorHandler')
 const validationMiddleware = require('./middleware/validation')
+const { auditMiddleware } = require('./utils/auditLog')
 
 // Import routes (will be created in next tasks)
+const authRoutes = require('./routes/auth')
+const userRoutes = require('./routes/user')
 const dashboardRoutes = require('./routes/dashboard')
 const mutualFundsRoutes = require('./routes/mutualFunds')
 const fixedDepositsRoutes = require('./routes/fixedDeposits')
@@ -37,6 +40,9 @@ app.use((req, res, next) => {
   next()
 })
 
+// Audit logging middleware
+app.use(auditMiddleware)
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -47,6 +53,8 @@ app.get('/health', (req, res) => {
 })
 
 // API routes (will be uncommented as routes are created)
+app.use('/api/auth', authRoutes)
+app.use('/api/user', userRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/mutual-funds', mutualFundsRoutes)
 app.use('/api/fixed-deposits', fixedDepositsRoutes)

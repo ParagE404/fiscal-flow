@@ -225,119 +225,210 @@
   - Add sector categorization support (Energy, IT Services, Banking, etc.) with proper validation
   - _Requirements: 5.5, 5.6, 5.7_
 
-- [ ] 10. Settings Page Implementation
+- [-] 10. User Authentication and Onboarding System
+
+  - Implement complete user authentication system with registration, login, and session management
+  - Create user onboarding flow with welcome screens, profile setup, and portfolio initialization
+  - Add user management features including profile editing, password reset, and account settings
+  - _Requirements: User management, data security, personalized experience_
+
+- [x] 10.1 Backend Authentication System
+
+  - Implement JWT-based authentication with user registration and login endpoints
+  - Create user model with secure password hashing using bcrypt
+  - Add authentication middleware to protect all API endpoints with proper user context
+  - _Requirements: Secure user authentication, data isolation, session management_
+
+- [x] 10.2 User Registration and Login API
+
+  - Create POST /api/auth/register endpoint with email validation and password strength requirements
+  - Implement POST /api/auth/login endpoint with JWT token generation and user session creation
+  - Add POST /api/auth/logout endpoint for secure session termination and token invalidation
+  - _Requirements: User account creation, secure login, session management_
+
+- [x] 10.3 Email Verification System
+
+  - Create POST /api/auth/send-verification endpoint for sending email verification tokens
+  - Implement GET /api/auth/verify-email/:token endpoint for email confirmation
+  - Add email verification status tracking and prevent unverified users from accessing portfolio data
+  - _Requirements: Email verification, account security, spam prevention_
+
+- [x] 10.4 User Profile Management API
+
+  - Create GET /api/user/profile endpoint for retrieving user information and preferences
+  - Implement PUT /api/user/profile endpoint for updating user details and app preferences
+  - Add POST /api/auth/reset-password endpoint for secure password reset functionality
+  - _Requirements: User profile management, password security, account maintenance_
+
+- [x] 10.5 Security and Account Protection
+
+  - Implement rate limiting for authentication endpoints to prevent brute force attacks
+  - Add account lockout mechanism after multiple failed login attempts
+  - Create audit log for user authentication events and suspicious activities
+  - _Requirements: Account security, attack prevention, compliance_
+
+- [x] 10.6 Frontend Authentication UI
+
+  - Create login page with email/password form validation and error handling
+  - Implement registration page with user details form and terms acceptance
+  - Add password reset flow with email input and confirmation screens
+  - _Requirements: User-friendly authentication, form validation, error handling_
+
+- [x] 10.7 Email Verification Frontend
+
+  - Create email verification page with resend verification email functionality
+  - Implement verification success/failure screens with appropriate messaging
+  - Add email verification status indicators and prompts throughout the application
+  - _Requirements: Email verification UX, user guidance, verification status_
+
+- [x] 10.8 User Profile and Account Management
+
+  - Create user profile page with avatar upload and personal information editing
+  - Implement account settings page with password change and security preferences
+  - Add account deletion functionality with data export option and confirmation flow
+  - _Requirements: User profile management, account control, data portability_
+
+- [x] 10.9 User Onboarding Flow
+
+  - Create welcome screen with app introduction and feature highlights
+  - Implement step-by-step profile setup wizard (personal info, preferences, initial portfolio setup)
+  - Add interactive guided tour with tooltips for key features and skip option for experienced users
+  - _Requirements: User onboarding experience, feature discovery, initial setup_
+
+- [ ] 10.10 Protected Routes and Session Management
+
+  - Implement React Router protected routes with authentication checks and email verification requirements
+  - Create session management with automatic token refresh and logout on expiry
+  - Add user context provider for accessing user data across components with loading states
+  - _Requirements: Route protection, session persistence, user state management_
+
+- [x] 10.11 Data Migration and User Context
+
+  - Create data migration script to convert existing default user data to proper user accounts
+  - Update all API endpoints to use authenticated user context instead of default user
+  - Implement comprehensive data isolation ensuring users can only access their own financial data
+  - _Requirements: Data security, user privacy, multi-user support, backward compatibility_
+
+- [ ] 11. User Preferences and Settings Integration
+
+  - Migrate existing app settings to user-specific preferences stored in user profiles
+  - Implement user preference synchronization across devices and sessions
+  - Add preference reset functionality and default settings management
+  - _Requirements: User-specific settings, preference persistence, settings management_
+
+- [ ] 12. Settings Page Implementation
 
   - Create settings page with two-column layout (Export section and App preferences section)
   - Implement complete portfolio export functionality with comprehensive CSV generation
   - Add category-wise export buttons for individual investment types
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 10.1 Export Data Functionality
+- [ ] 12.1 Export Data Functionality
 
   - Create export section with "Export Complete Portfolio" button generating comprehensive CSV
   - Implement separate export buttons for Mutual Funds, Fixed Deposits, EPF, and Stocks data
   - Add proper CSV formatting with all relevant fields and headers in Indian currency format
   - _Requirements: 6.2, 6.3, 6.9_
 
-- [ ] 10.2 App Preferences Configuration
+- [ ] 12.2 App Preferences Configuration
 
   - Create preferences section with currency format setting showing "Indian Rupees (₹)" option
   - Implement number format setting with "Indian (₹1,23,456)" format selection
   - Add dark mode toggle functionality with theme switching capability
   - _Requirements: 6.4, 6.5, 6.6_
 
-- [ ] 10.3 Additional Settings Features
+- [ ] 12.3 Additional Settings Features
 
   - Implement auto-refresh prices toggle (placeholder for future live price integration)
   - Add push notifications toggle for important updates and reminders
-  - Create settings persistence using local storage or user preferences API
+  - Create settings persistence using user preferences API instead of local storage
   - _Requirements: 6.7, 6.8_
 
-- [ ] 11. Form Validation and Error Handling
+- [ ] 13. Form Validation and Error Handling
 
   - Implement comprehensive form validation using Shadcn Form components with Zod schemas
   - Add proper error message display for validation failures with clear user guidance
   - Create loading states and success/error toast notifications for all user actions
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
 
-- [ ] 11.1 Input Validation Implementation
+- [ ] 13.1 Input Validation Implementation
 
   - Add financial amount validation ensuring positive numbers for investments
   - Implement date validation with proper format checking and logical date range validation
   - Create percentage validation for rates and returns within reasonable ranges
   - _Requirements: 8.3, 8.4, 8.5_
 
-- [ ] 11.2 User Feedback and Loading States
+- [ ] 13.2 User Feedback and Loading States
 
   - Implement toast notifications for success/error feedback on all CRUD operations
   - Add loading spinners and skeleton states during API calls and data fetching
   - Create confirmation dialogs for delete operations with proper user warnings
   - _Requirements: 8.6, 8.7, 8.8_
 
-- [ ] 12. Indian Market Localization
+- [ ] 14. Indian Market Localization
 
   - Implement Indian currency formatting (₹1,23,456) throughout the application
   - Add Indian number format support with lakhs/crores system for large amounts
   - Create date formatting using DD/MM/YYYY format for all date displays
   - _Requirements: 1.3, 3.5, 4.7, 5.9_
 
-- [ ] 12.1 Currency and Number Formatting
+- [ ] 14.1 Currency and Number Formatting
 
   - Create utility functions for Indian rupee formatting with proper comma placement
   - Implement lakhs/crores conversion for large financial amounts display
   - Add consistent currency symbol (₹) usage across all financial value displays
   - _Requirements: 1.3_
 
-- [ ] 12.2 EPF and Stock Market Context
+- [ ] 14.2 EPF and Stock Market Context
 
   - Add EPF-specific field handling for PF numbers and employer details validation
   - Implement stock market context with NSE/BSE references and Indian sector classifications
   - Create market cap categorization specific to Indian stock market standards
   - _Requirements: 4.2, 4.3, 5.2, 5.6_
 
-- [ ] 13. Integration Testing and API Connection
+- [ ] 15. Integration Testing and API Connection
 
   - Connect frontend MobX stores to backend API endpoints with proper error handling
   - Test all CRUD operations end-to-end from frontend forms to database persistence
   - Implement optimistic updates for better user experience during API calls
   - _Requirements: All integration requirements_
 
-- [ ] 13.1 API Integration Testing
+- [ ] 15.1 API Integration Testing
 
   - Test all API endpoints with frontend forms ensuring proper data flow
   - Implement error handling for network failures and API errors with user-friendly messages
   - Add retry logic for failed API calls and proper loading state management
   - _Requirements: 8.6_
 
-- [ ] 13.2 Data Synchronization
+- [ ] 15.2 Data Synchronization
 
   - Ensure real-time data sync between frontend state and backend database
   - Implement proper cache invalidation when data is updated through forms
   - Add data refresh mechanisms to keep portfolio information current
   - _Requirements: All data consistency requirements_
 
-- [ ] 14. Responsive Design and Mobile Optimization
+- [ ] 16. Responsive Design and Mobile Optimization
 
   - Implement responsive design for all pages ensuring mobile compatibility
   - Add proper breakpoints for tablet and mobile screen sizes
   - Create collapsible sidebar navigation for mobile devices
   - _Requirements: 7.6_
 
-- [ ] 14.1 Mobile Layout Optimization
+- [ ] 16.1 Mobile Layout Optimization
 
   - Optimize card layouts for mobile screens with proper stacking and spacing
   - Implement touch-friendly buttons and form inputs for mobile interaction
   - Add responsive table layouts that work well on smaller screens
   - _Requirements: 7.6, 7.7_
 
-- [ ] 15. Performance Optimization and Final Polish
+- [ ] 17. Performance Optimization and Final Polish
 
   - Implement code splitting for better initial load performance
   - Add memoization for expensive calculations and component re-renders
   - Optimize bundle size and implement lazy loading for non-critical components
   - _Requirements: Performance and user experience requirements_
 
-- [ ] 15.1 Final Testing and Bug Fixes
+- [ ] 17.1 Final Testing and Bug Fixes
   - Conduct comprehensive testing of all features across different browsers
   - Fix any remaining bugs and edge cases in form validation and data display
   - Perform final UI/UX polish to match wireframe specifications exactly

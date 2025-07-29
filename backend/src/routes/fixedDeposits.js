@@ -2,6 +2,11 @@ const express = require('express')
 const router = express.Router()
 const fixedDepositsController = require('../controllers/fixedDepositsController')
 const { validate, schemas } = require('../middleware/validation')
+const { authenticateToken, requireEmailVerification } = require('../middleware/auth')
+
+// All fixed deposits routes require authentication and email verification
+router.use(authenticateToken)
+router.use(requireEmailVerification)
 
 // GET /api/fixed-deposits - Get all fixed deposits with summary
 router.get('/', fixedDepositsController.getAllFixedDeposits)

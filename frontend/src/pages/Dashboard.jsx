@@ -53,7 +53,7 @@ export const Dashboard = observer(() => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div data-tour="summary-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {summaryData.map((item, index) => (
           <SummaryCard
             key={index}
@@ -68,7 +68,7 @@ export const Dashboard = observer(() => {
 
       {/* Asset allocation and top performers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card data-tour="asset-allocation">
           <CardHeader>
             <CardTitle>Asset Allocation</CardTitle>
           </CardHeader>
@@ -80,7 +80,7 @@ export const Dashboard = observer(() => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="top-performers">
           <CardHeader>
             <CardTitle>Top Performers</CardTitle>
           </CardHeader>

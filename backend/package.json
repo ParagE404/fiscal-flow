@@ -12,17 +12,25 @@
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "@prisma/client": "^5.6.0",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "@prisma/client": "^5.6.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
     "prisma": "^5.6.0"
   },
-  "keywords": ["finance", "dashboard", "api"],
+  "keywords": [
+    "finance",
+    "dashboard",
+    "api"
+  ],
   "author": "",
   "license": "MIT"
 }
