@@ -10,7 +10,9 @@ import { MutualFundsList } from '@/components/mutual-funds/MutualFundsList'
 import { SIPsList } from '@/components/mutual-funds/SIPsList'
 import { AddFundModal } from '@/components/mutual-funds/AddFundModal'
 import { AddSIPModal } from '@/components/mutual-funds/AddSIPModal'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { apiClient } from '@/lib/apiClient'
+import { toast } from '@/lib/toast'
 
 export const MutualFunds = observer(() => {
   const [showAddFundModal, setShowAddFundModal] = useState(false)
@@ -29,7 +31,10 @@ export const MutualFunds = observer(() => {
     ? portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.cagr || 0), 0) / portfolioStore.mutualFunds.length 
     : 0
 
+  const [isExporting, setIsExporting] = useState(false)
+
   const handleExport = async () => {
+    setIsExporting(true)
     try {
       const response = await apiClient.exportMutualFunds()
       
@@ -43,29 +48,39 @@ export const MutualFunds = observer(() => {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
+      
+      toast.success('Mutual funds data exported successfully')
     } catch (error) {
       console.error('Export failed:', error)
+      toast.error('Failed to export data. Please try again.')
+    } finally {
+      setIsExporting(false)
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Mutual Funds</h1>
-          <p className="text-muted-foreground">Track your mutual fund investments and SIPs</p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold">Mutual Funds</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Track your mutual fund investments and SIPs</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
+        <div className="flex gap-2 flex-shrink-0">
+          <Button variant="outline" onClick={handleExport} disabled={isExporting} size="sm" className="sm:size-default">
+            {isExporting ? (
+              <LoadingSpinner size="sm" className="mr-2" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
+            <span className="sm:hidden">{isExporting ? '...' : 'Export'}</span>
           </Button>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -102,15 +117,23 @@ export const MutualFunds = observer(() => {
 
       {/* Tabs for Mutual Funds and SIPs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="funds">My Mutual Funds</TabsTrigger>
-            <TabsTrigger value="sips">Active SIPs</TabsTrigger>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="funds" className="flex-1 sm:flex-none">
+              <span className="hidden sm:inline">My Mutual Funds</span>
+              <span className="sm:hidden">Funds</span>
+            </TabsTrigger>
+            <TabsTrigger value="sips" className="flex-1 sm:flex-none">
+              <span className="hidden sm:inline">Active SIPs</span>
+              <span className="sm:hidden">SIPs</span>
+            </TabsTrigger>
           </TabsList>
           
           <Button 
             data-tour="add-button"
             onClick={() => activeTab === 'funds' ? setShowAddFundModal(true) : setShowAddSIPModal(true)}
+            size="sm"
+            className="sm:size-default w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             {activeTab === 'funds' ? 'Add Fund' : 'Add SIP'}

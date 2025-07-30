@@ -22,6 +22,8 @@ const AUDIT_EVENTS = {
   PROFILE_UPDATED: 'PROFILE_UPDATED',
   PASSWORD_CHANGED: 'PASSWORD_CHANGED',
   EMAIL_CHANGED: 'EMAIL_CHANGED',
+  PREFERENCES_UPDATED: 'PREFERENCES_UPDATED',
+  PREFERENCES_RESET: 'PREFERENCES_RESET',
   
   // Security events
   SUSPICIOUS_LOGIN_ATTEMPT: 'SUSPICIOUS_LOGIN_ATTEMPT',
@@ -131,7 +133,13 @@ const logProfileEvent = {
     logAuditEvent(AUDIT_EVENTS.PASSWORD_CHANGED, userId, {}, req),
     
   emailChanged: (userId, oldEmail, newEmail, req) => 
-    logAuditEvent(AUDIT_EVENTS.EMAIL_CHANGED, userId, { oldEmail, newEmail }, req)
+    logAuditEvent(AUDIT_EVENTS.EMAIL_CHANGED, userId, { oldEmail, newEmail }, req),
+    
+  preferencesUpdated: (userId, changes, req) => 
+    logAuditEvent(AUDIT_EVENTS.PREFERENCES_UPDATED, userId, { changes }, req),
+    
+  preferencesReset: (userId, req) => 
+    logAuditEvent(AUDIT_EVENTS.PREFERENCES_RESET, userId, {}, req)
 };
 
 /**

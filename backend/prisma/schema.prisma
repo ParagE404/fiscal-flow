@@ -20,6 +20,7 @@ model User {
   loginAttempts         Int       @default(0)
   lockUntil             DateTime?
   lastLogin             DateTime?
+  preferences           Json?     @default("{}")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   

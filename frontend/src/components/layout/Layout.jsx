@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { EmailVerificationBanner } from '../common/EmailVerificationBanner'
+import { useSession } from '../../hooks/useSession'
 
 // Page titles mapping
 const pageTitles = {
@@ -17,6 +18,9 @@ const pageTitles = {
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
+  
+  // Initialize session management
+  useSession()
   
   const currentPage = pageTitles[location.pathname] || { 
     title: 'FiscalFlow', 
@@ -44,8 +48,8 @@ export function Layout() {
           subtitle={currentPage.subtitle}
         />
         
-        {/* Page content */}
-        <main className="p-6">
+        {/* Page content with responsive padding */}
+        <main className="p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

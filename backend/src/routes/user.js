@@ -5,7 +5,10 @@ const {
   changePassword, 
   deleteAccount, 
   getSecurityInfo,
-  exportUserData
+  exportUserData,
+  getPreferences,
+  updatePreferences,
+  resetPreferences
 } = require('../controllers/userController');
 const { authenticateToken, requireEmailVerification } = require('../middleware/auth');
 const { apiLimiter } = require('../middleware/rateLimiter');
@@ -18,6 +21,11 @@ router.use(authenticateToken);
 // Profile routes
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
+
+// Preferences routes
+router.get('/preferences', getPreferences);
+router.put('/preferences', updatePreferences);
+router.post('/preferences/reset', resetPreferences);
 
 // Security routes
 router.get('/security', getSecurityInfo);

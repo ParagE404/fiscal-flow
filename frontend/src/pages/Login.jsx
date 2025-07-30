@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { useAuthStore } from '@/stores/StoreContext'
+import { useUser } from '../contexts/UserContext'
 
 const loginSchema = z.object({
   email: z
@@ -27,7 +27,7 @@ const loginSchema = z.object({
 
 export const Login = observer(() => {
   const [showPassword, setShowPassword] = useState(false)
-  const authStore = useAuthStore()
+  const { login, isLoading } = useUser()
   const navigate = useNavigate()
 
   const form = useForm({
@@ -40,7 +40,7 @@ export const Login = observer(() => {
 
   const onSubmit = async (data) => {
     try {
-      await authStore.login(data)
+      await login(data)
       toast.success('Login successful!')
       navigate('/')
     } catch (error) {
@@ -77,7 +77,7 @@ export const Login = observer(() => {
                         type="email"
                         placeholder="Enter your email"
                         {...field}
-                        disabled={authStore.isLoading}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -97,7 +97,7 @@ export const Login = observer(() => {
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Enter your password"
                           {...field}
-                          disabled={authStore.isLoading}
+                          disabled={isLoading}
                         />
                         <Button
                           type="button"
@@ -105,7 +105,7 @@ export const Login = observer(() => {
                           size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
-                          disabled={authStore.isLoading}
+                          disabled={isLoading}
                         >
                           {showPassword ? (
                             <EyeOff className="h-4 w-4" />
@@ -134,9 +134,9 @@ export const Login = observer(() => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={authStore.isLoading}
+                disabled={isLoading}
               >
-                {authStore.isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
           </Form>

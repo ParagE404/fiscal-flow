@@ -4,22 +4,22 @@ import { toast } from 'sonner'
 import { Mail, X, AlertTriangle, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/StoreContext'
+import { useUser } from '../../contexts/UserContext'
 
 export const EmailVerificationBanner = observer(() => {
   const [isDismissed, setIsDismissed] = useState(false)
   const [isResending, setIsResending] = useState(false)
-  const authStore = useAuthStore()
+  const { needsEmailVerification, user, sendVerificationEmail } = useUser()
 
-  // Don't show if user is not authenticated, email is verified, or banner is dismissed
-  if (!authStore.needsEmailVerification || isDismissed) {
+  // Don't show if user doesn't need email verification or banner is dismissed
+  if (!needsEmailVerification || isDismissed) {
     return null
   }
 
   const handleResendEmail = async () => {
     setIsResending(true)
     try {
-      await authStore.sendVerificationEmail()
+      await sendVerificationEmail()
       toast.success('Verification email sent! Please check your inbox.')
     } catch (error) {
       console.error('Failed to resend verification email:', error)
@@ -45,7 +45,7 @@ export const EmailVerificationBanner = observer(() => {
               Please verify your email address
             </p>
             <p className="text-sm text-orange-700">
-              We sent a verification link to <span className="font-medium">{authStore.user?.email}</span>. 
+              We sent a verification link to <span className="font-medium">{user?.email}</span>. 
               Check your inbox and click the link to access all features.
             </p>
           </div>

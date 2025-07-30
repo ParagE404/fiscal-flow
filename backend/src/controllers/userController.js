@@ -17,6 +17,67 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters')
 });
 
+const updatePreferencesSchema = z.object({
+  theme: z.enum(['light', 'dark', 'system']).optional(),
+  currency: z.object({
+    code: z.string().default('INR'),
+    symbol: z.string().default('₹'),
+    format: z.enum(['indian', 'international']).default('indian')
+  }).optional(),
+  numberFormat: z.object({
+    style: z.enum(['indian', 'international']).default('indian'),
+    decimalPlaces: z.number().min(0).max(4).default(2)
+  }).optional(),
+  autoRefreshPrices: z.boolean().optional(),
+  pushNotifications: z.object({
+    enabled: z.boolean().default(false),
+    sipReminders: z.boolean().default(false),
+    fdMaturityAlerts: z.boolean().default(false),
+    portfolioUpdates: z.boolean().default(false)
+  }).optional(),
+  dashboard: z.object({
+    defaultView: z.enum(['overview', 'detailed']).default('overview'),
+    showWelcomeMessage: z.boolean().default(true),
+    compactMode: z.boolean().default(false)
+  }).optional(),
+  onboarding: z.object({
+    completed: z.boolean().default(false),
+    skippedSteps: z.array(z.string()).default([]),
+    lastCompletedStep: z.string().optional()
+  }).optional()
+});
+
+// Default preferences
+const defaultPreferences = {
+  theme: 'system',
+  currency: {
+    code: 'INR',
+    symbol: '₹',
+    format: 'indian'
+  },
+  numberFormat: {
+    style: 'indian',
+    decimalPlaces: 2
+  },
+  autoRefreshPrices: false,
+  pushNotifications: {
+    enabled: false,
+    sipReminders: false,
+    fdMaturityAlerts: false,
+    portfolioUpdates: false
+  },
+  dashboard: {
+    defaultView: 'overview',
+    showWelcomeMessage: true,
+    compactMode: false
+  },
+  onboarding: {
+    completed: false,
+    skippedSteps: [],
+    lastCompletedStep: null
+  }
+};
+
 /**
  * Get user profile
  */
@@ -31,6 +92,7 @@ const getProfile = async (req, res) => {
         avatar: true,
         isEmailVerified: true,
         lastLogin: true,
+        preferences: true,
         createdAt: true,
         updatedAt: true,
         // Include portfolio counts for profile stats
@@ -53,9 +115,14 @@ const getProfile = async (req, res) => {
       });
     }
 
+    // Merge user preferences with defaults
+    const userPreferences = user.preferences || {};
+    const mergedPreferences = mergePreferences(defaultPreferences, userPreferences);
+
     res.json({
       user: {
         ...user,
+        preferences: mergedPreferences,
         portfolioStats: {
           totalInvestments: user._count.mutualFunds + user._count.fixedDeposits + user._count.epfAccounts + user._count.stocks,
           mutualFunds: user._count.mutualFunds,
@@ -442,11 +509,173 @@ const getSecurityInfo = async (req, res) => {
   }
 };
 
+/**
+ * Get user preferences
+ */
+const getPreferences = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        preferences: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'User account not found'
+      });
+    }
+
+    // Merge user preferences with defaults
+    const userPreferences = user.preferences || {};
+    const mergedPreferences = mergePreferences(defaultPreferences, userPreferences);
+
+    res.json({
+      preferences: mergedPreferences
+    });
+
+  } catch (error) {
+    console.error('Get preferences error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to get user preferences'
+    });
+  }
+};
+
+/**
+ * Update user preferences
+ */
+const updatePreferences = async (req, res) => {
+  try {
+    // Validate input
+    const validatedData = updatePreferencesSchema.parse(req.body);
+
+    // Get current user preferences
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        preferences: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'User account not found'
+      });
+    }
+
+    // Merge current preferences with updates
+    const currentPreferences = user.preferences || {};
+    const updatedPreferences = mergePreferences(currentPreferences, validatedData);
+
+    // Update user preferences
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        preferences: updatedPreferences
+      },
+      select: {
+        preferences: true,
+        updatedAt: true
+      }
+    });
+
+    // Merge with defaults for response
+    const finalPreferences = mergePreferences(defaultPreferences, updatedUser.preferences);
+
+    // Log preference update
+    await logProfileEvent.preferencesUpdated(req.user.id, Object.keys(validatedData), req);
+
+    res.json({
+      message: 'Preferences updated successfully',
+      preferences: finalPreferences,
+      updatedAt: updatedUser.updatedAt
+    });
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Invalid preference data',
+        details: error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    console.error('Update preferences error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to update preferences'
+    });
+  }
+};
+
+/**
+ * Reset user preferences to defaults
+ */
+const resetPreferences = async (req, res) => {
+  try {
+    // Update user preferences to defaults
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        preferences: defaultPreferences
+      },
+      select: {
+        preferences: true,
+        updatedAt: true
+      }
+    });
+
+    // Log preference reset
+    await logProfileEvent.preferencesReset(req.user.id, req);
+
+    res.json({
+      message: 'Preferences reset to defaults successfully',
+      preferences: defaultPreferences,
+      updatedAt: updatedUser.updatedAt
+    });
+
+  } catch (error) {
+    console.error('Reset preferences error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to reset preferences'
+    });
+  }
+};
+
+/**
+ * Helper function to deep merge preferences
+ */
+const mergePreferences = (defaults, userPrefs) => {
+  const result = { ...defaults };
+  
+  for (const key in userPrefs) {
+    if (userPrefs[key] !== null && typeof userPrefs[key] === 'object' && !Array.isArray(userPrefs[key])) {
+      result[key] = mergePreferences(defaults[key] || {}, userPrefs[key]);
+    } else {
+      result[key] = userPrefs[key];
+    }
+  }
+  
+  return result;
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   changePassword,
   deleteAccount,
   getSecurityInfo,
-  exportUserData
+  exportUserData,
+  getPreferences,
+  updatePreferences,
+  resetPreferences
 };

@@ -20,9 +20,6 @@ class UIStore {
 
   constructor() {
     makeAutoObservable(this)
-    
-    // Load preferences from localStorage
-    this.loadPreferences()
   }
 
   // Sidebar actions
@@ -34,25 +31,15 @@ class UIStore {
     this.sidebarCollapsed = collapsed
   }
 
-  // Dark mode actions
+  // Dark mode actions (deprecated - use PreferencesStore)
   toggleDarkMode() {
+    console.warn('UIStore.toggleDarkMode is deprecated. Use PreferencesStore.setTheme instead.')
     this.darkMode = !this.darkMode
-    this.savePreferences()
-    this.applyTheme()
   }
 
   setDarkMode(enabled) {
+    console.warn('UIStore.setDarkMode is deprecated. Use PreferencesStore.setTheme instead.')
     this.darkMode = enabled
-    this.savePreferences()
-    this.applyTheme()
-  }
-
-  applyTheme() {
-    if (this.darkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
   }
 
   // Page navigation
@@ -139,33 +126,14 @@ class UIStore {
     })
   }
 
-  // Preferences management
+  // Legacy preferences management (deprecated)
+  // These methods are kept for backward compatibility but should not be used
   loadPreferences() {
-    try {
-      const saved = localStorage.getItem('fiscalflow-preferences')
-      if (saved) {
-        const preferences = JSON.parse(saved)
-        this.darkMode = preferences.darkMode || false
-        this.sidebarCollapsed = preferences.sidebarCollapsed || false
-      }
-    } catch (error) {
-      console.warn('Failed to load preferences:', error)
-    }
-    
-    // Apply theme on load
-    this.applyTheme()
+    console.warn('UIStore.loadPreferences is deprecated. Use PreferencesStore instead.')
   }
 
   savePreferences() {
-    try {
-      const preferences = {
-        darkMode: this.darkMode,
-        sidebarCollapsed: this.sidebarCollapsed,
-      }
-      localStorage.setItem('fiscalflow-preferences', JSON.stringify(preferences))
-    } catch (error) {
-      console.warn('Failed to save preferences:', error)
-    }
+    console.warn('UIStore.savePreferences is deprecated. Use PreferencesStore instead.')
   }
 
   // Form states

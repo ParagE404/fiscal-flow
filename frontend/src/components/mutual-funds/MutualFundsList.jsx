@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { MobileCard, MobileField, ResponsiveTable, ResponsiveTableHeader, ResponsiveTableBody } from '@/components/ui/responsive-table'
 import { Edit, Trash2, Star, ArrowUpDown } from 'lucide-react'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { formatCurrency, formatPercentage, getValueColor } from '@/lib/utils'
+import { toast } from '@/lib/toast'
 import { AddFundModal } from './AddFundModal'
 
 export const MutualFundsList = observer(() => {
@@ -17,6 +20,7 @@ export const MutualFundsList = observer(() => {
   const [deletingFund, setDeletingFund] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const { mutualFunds, loading, error } = portfolioStore
 
@@ -60,12 +64,17 @@ export const MutualFundsList = observer(() => {
 
   const confirmDelete = async () => {
     if (deletingFund) {
+      setIsDeleting(true)
       try {
         await portfolioStore.deleteMutualFund(deletingFund.id)
+        toast.crud.deleted('Mutual fund')
         setShowDeleteDialog(false)
         setDeletingFund(null)
       } catch (error) {
         console.error('Failed to delete fund:', error)
+        toast.crud.deleteError('Mutual fund')
+      } finally {
+        setIsDeleting(false)
       }
     }
   }
@@ -120,9 +129,25 @@ export const MutualFundsList = observer(() => {
   if (loading.mutualFunds) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="text-muted-foreground">Loading mutual funds...</div>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-6 w-48" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -158,11 +183,11 @@ export const MutualFundsList = observer(() => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>My Mutual Funds ({mutualFunds.length})</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">My Mutual Funds ({mutualFunds.length})</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
+        <CardContent className="p-0 sm:p-6">
+          <ResponsiveTable>
+            <ResponsiveTableHeader>
               <TableRow>
                 <SortableHeader field="name">Fund Name</SortableHeader>
                 <SortableHeader field="category">Category</SortableHeader>
@@ -173,8 +198,8 @@ export const MutualFundsList = observer(() => {
                 <SortableHeader field="cagr">CAGR</SortableHeader>
                 <TableHead>Actions</TableHead>
               </TableRow>
-            </TableHeader>
-            <TableBody>
+            </ResponsiveTableHeader>
+            <ResponsiveTableBody>
               {sortedFunds.map((fund) => {
                 const returns = (fund.currentValue || 0) - (fund.investedAmount || 0)
                 const returnsPercentage = fund.investedAmount > 0 
@@ -230,8 +255,89 @@ export const MutualFundsList = observer(() => {
                   </TableRow>
                 )
               })}
-            </TableBody>
-          </Table>
+            </ResponsiveTableBody>
+          </ResponsiveTable>
+          
+          {/* Mobile card view */}
+          <div className="sm:hidden space-y-4 p-4">
+            {sortedFunds.map((fund) => {
+              const returns = (fund.currentValue || 0) - (fund.investedAmount || 0)
+              const returnsPercentage = fund.investedAmount > 0 
+                ? (returns / fund.investedAmount) * 100 
+                : 0
+
+              return (
+                <MobileCard key={fund.id}>
+                  <div className="space-y-3">
+                    {/* Fund name and actions */}
+                    <div className="flex justify-between items-start">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-sm truncate">{fund.name}</h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant={getCategoryVariant(fund.category)} className="text-xs">
+                            {fund.category}
+                          </Badge>
+                          <Badge variant={getRiskLevelVariant(fund.riskLevel)} className="text-xs">
+                            {fund.riskLevel}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex space-x-1 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(fund)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(fund)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Rating */}
+                    <MobileField 
+                      label="Rating" 
+                      value={renderStars(fund.rating || 0)} 
+                    />
+                    
+                    {/* Financial details */}
+                    <div className="space-y-1">
+                      <MobileField 
+                        label="Invested" 
+                        value={formatCurrency(fund.investedAmount || 0)} 
+                      />
+                      <MobileField 
+                        label="Current Value" 
+                        value={formatCurrency(fund.currentValue || 0)} 
+                      />
+                      <MobileField 
+                        label="Returns" 
+                        value={
+                          <span className={getValueColor(returns)}>
+                            {returns >= 0 ? '+' : ''}{formatCurrency(returns)} ({formatPercentage(returnsPercentage)})
+                          </span>
+                        } 
+                      />
+                      <MobileField 
+                        label="CAGR" 
+                        value={
+                          <span className={getValueColor(fund.cagr || 0)}>
+                            {formatPercentage(fund.cagr || 0)}
+                          </span>
+                        } 
+                      />
+                    </div>
+                  </div>
+                </MobileCard>
+              )
+            })}
+          </div>
         </CardContent>
       </Card>
 
@@ -247,24 +353,16 @@ export const MutualFundsList = observer(() => {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Mutual Fund</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{deletingFund?.name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Mutual Fund"
+        itemName={`"${deletingFund?.name}"`}
+        itemType="mutual fund"
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+        additionalWarning="All associated data including performance history will be permanently removed."
+      />
     </>
   )
 })

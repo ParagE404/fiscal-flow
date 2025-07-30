@@ -2,18 +2,20 @@ import React, { createContext, useContext } from 'react'
 import { portfolioStore } from './PortfolioStore'
 import { uiStore } from './UIStore'
 import { authStore } from './AuthStore'
+import { preferencesStore } from './PreferencesStore'
 
 // Create store context
 const StoreContext = createContext({
   portfolioStore,
   uiStore,
   authStore,
+  preferencesStore,
 })
 
 // Store provider component
 export function StoreProvider({ children }) {
   return (
-    <StoreContext.Provider value={{ portfolioStore, uiStore, authStore }}>
+    <StoreContext.Provider value={{ portfolioStore, uiStore, authStore, preferencesStore }}>
       {children}
     </StoreContext.Provider>
   )
@@ -42,4 +44,9 @@ export function useUIStore() {
 export function useAuthStore() {
   const { authStore } = useStores()
   return authStore
+}
+
+export function usePreferencesStore() {
+  const { preferencesStore } = useStores()
+  return preferencesStore
 }

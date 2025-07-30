@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button'
 import { SummaryCard } from '@/components/common/SummaryCard'
 import { EPFAccountCard } from '@/components/epf/EPFAccountCard'
 import { AddEPFModal } from '@/components/epf/AddEPFModal'
+import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { Plus, Building2, Download, AlertCircle } from 'lucide-react'
 import { portfolioStore } from '@/stores/PortfolioStore'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export const EPF = observer(() => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingEPF, setEditingEPF] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     portfolioStore.fetchEPFAccounts()
@@ -63,14 +66,25 @@ export const EPF = observer(() => {
     }
   }
 
-  const handleDeleteEPF = async (epfId) => {
-    try {
-      await portfolioStore.deleteEPFAccount(epfId)
-      toast.success('EPF account deleted successfully')
-      setDeleteConfirm(null)
-    } catch (error) {
-      toast.error('Failed to delete EPF account')
-      console.error('Error deleting EPF account:', error)
+  const handleDeleteEPF = (epfId) => {
+    setDeleteConfirm(epfId)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteEPF = async () => {
+    if (deleteConfirm) {
+      setIsDeleting(true)
+      try {
+        await portfolioStore.deleteEPFAccount(deleteConfirm)
+        toast.crud.deleted('EPF account')
+        setShowDeleteDialog(false)
+        setDeleteConfirm(null)
+      } catch (error) {
+        console.error('Error deleting EPF account:', error)
+        toast.crud.deleteError('EPF account')
+      } finally {
+        setIsDeleting(false)
+      }
     }
   }
 
@@ -96,31 +110,35 @@ export const EPF = observer(() => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">EPF Accounts</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">EPF Accounts</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Track your Employee Provident Fund contributions and balances
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button
             variant="outline"
             onClick={handleExport}
             disabled={epfAccounts.length === 0}
+            size="sm"
+            className="sm:size-default"
           >
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
+            <span className="sm:hidden">Export</span>
           </Button>
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button onClick={() => setShowAddModal(true)} size="sm" className="sm:size-default">
             <Plus className="h-4 w-4 mr-2" />
-            Add EPF Account
+            <span className="hidden sm:inline">Add EPF Account</span>
+            <span className="sm:hidden">Add EPF</span>
           </Button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <SummaryCard
           title="Total EPF Balance"
           value={summaryData.totalBalance}
@@ -164,7 +182,7 @@ export const EPF = observer(() => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {[1, 2].map((i) => (
                 <EPFAccountCard key={i} loading={true} />
               ))}
@@ -200,13 +218,13 @@ export const EPF = observer(() => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {epfAccounts.map((epfAccount) => (
                 <EPFAccountCard
                   key={epfAccount.id}
                   epfAccount={epfAccount}
                   onEdit={handleEditEPF}
-                  onDelete={(id) => setDeleteConfirm(id)}
+                  onDelete={handleDeleteEPF}
                 />
               ))}
             </div>
@@ -224,37 +242,16 @@ export const EPF = observer(() => {
       />
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertCircle className="h-5 w-5" />
-                Delete EPF Account
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Are you sure you want to delete this EPF account? This action cannot be undone.
-              </p>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeleteConfirm(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDeleteEPF(deleteConfirm)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete EPF Account"
+        itemName="this EPF account"
+        itemType="EPF account"
+        onConfirm={confirmDeleteEPF}
+        loading={isDeleting}
+        additionalWarning="All contribution history and balance information will be permanently removed."
+      />
     </div>
   )
 })

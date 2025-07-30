@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { UserProvider } from './contexts/UserContext'
 import { Layout } from './components/layout/Layout'
-import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { ProtectedRoute, EmailVerifiedRoute, PublicOnlyRoute } from './components/auth/ProtectedRoute'
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
 import { Dashboard } from './pages/Dashboard'
 import { MutualFunds } from './pages/MutualFunds'
@@ -24,34 +25,58 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Authentication routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-email/:token" element={<VerifyEmail />} />
-        <Route path="/verify-email/pending" element={<VerifyEmail />} />
-        
-        {/* Protected routes */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <>
-              <Layout />
-              {showOnboarding && (
-                <OnboardingFlow onComplete={handleOnboardingComplete} />
-              )}
-            </>
-          </ProtectedRoute>
-        }>
-          <Route index element={<Dashboard />} />
-          <Route path="mutual-funds" element={<MutualFunds />} />
-          <Route path="fixed-deposits" element={<FixedDeposits />} />
-          <Route path="epf" element={<EPF />} />
-          <Route path="stocks" element={<Stocks />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-      <Toaster position="top-right" />
+      <UserProvider>
+        <Routes>
+          {/* Public-only routes (redirect if authenticated) */}
+          <Route path="/login" element={
+            <PublicOnlyRoute>
+              <Login />
+            </PublicOnlyRoute>
+          } />
+          <Route path="/register" element={
+            <PublicOnlyRoute>
+              <Register />
+            </PublicOnlyRoute>
+          } />
+          <Route path="/forgot-password" element={
+            <PublicOnlyRoute>
+              <ForgotPassword />
+            </PublicOnlyRoute>
+          } />
+          
+          {/* Email verification routes (accessible to authenticated users) */}
+          <Route path="/verify-email/:token" element={
+            <ProtectedRoute>
+              <VerifyEmail />
+            </ProtectedRoute>
+          } />
+          <Route path="/verify-email/pending" element={
+            <ProtectedRoute>
+              <VerifyEmail />
+            </ProtectedRoute>
+          } />
+          
+          {/* Protected routes that require email verification */}
+          <Route path="/" element={
+            <EmailVerifiedRoute>
+              <>
+                <Layout />
+                {showOnboarding && (
+                  <OnboardingFlow onComplete={handleOnboardingComplete} />
+                )}
+              </>
+            </EmailVerifiedRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="mutual-funds" element={<MutualFunds />} />
+            <Route path="fixed-deposits" element={<FixedDeposits />} />
+            <Route path="epf" element={<EPF />} />
+            <Route path="stocks" element={<Stocks />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+        <Toaster position="top-right" />
+      </UserProvider>
     </Router>
   )
 }

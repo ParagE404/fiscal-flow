@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { portfolioStore } from '@/stores/PortfolioStore'
+import { toast } from '@/lib/toast'
 
 const BANKS = [
   'State Bank of India (SBI)',
@@ -216,13 +218,20 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
 
       if (editingFD) {
         await portfolioStore.updateFixedDeposit(editingFD.id, fdData)
+        toast.crud.updated('Fixed deposit')
       } else {
         await portfolioStore.addFixedDeposit(fdData)
+        toast.crud.created('Fixed deposit')
       }
 
       handleClose()
     } catch (error) {
       console.error('Failed to save FD:', error)
+      if (editingFD) {
+        toast.crud.updateError('Fixed deposit')
+      } else {
+        toast.crud.createError('Fixed deposit')
+      }
       setErrors({ submit: 'Failed to save fixed deposit. Please try again.' })
     } finally {
       setIsSubmitting(false)
@@ -422,10 +431,14 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting 
-                ? (editingFD ? 'Updating...' : 'Adding...') 
-                : (editingFD ? 'Update FD' : 'Add FD')
-              }
+              {isSubmitting ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  {editingFD ? 'Updating...' : 'Adding...'}
+                </>
+              ) : (
+                editingFD ? 'Update FD' : 'Add FD'
+              )}
             </Button>
           </DialogFooter>
         </form>

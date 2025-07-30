@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { MobileCard, MobileField, ResponsiveTable, ResponsiveTableHeader, ResponsiveTableBody } from '@/components/ui/responsive-table'
 import { 
   MoreHorizontal, 
   Edit, 
@@ -140,194 +141,281 @@ const StocksList = observer(({ onEdit, onDelete }) => {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('companyName')}
-            >
-              <div className="flex items-center">
-                Company
-                {renderSortIcon('companyName')}
+    <ResponsiveTable className="rounded-md border">
+      <ResponsiveTableHeader>
+        <TableRow>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleSort('companyName')}
+          >
+            <div className="flex items-center">
+              Company
+              {renderSortIcon('companyName')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleSort('symbol')}
+          >
+            <div className="flex items-center">
+              Symbol
+              {renderSortIcon('symbol')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleSort('sector')}
+          >
+            <div className="flex items-center">
+              Sector
+              {renderSortIcon('sector')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleSort('marketCap')}
+          >
+            <div className="flex items-center">
+              Market Cap
+              {renderSortIcon('marketCap')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('quantity')}
+          >
+            <div className="flex items-center justify-end">
+              Quantity
+              {renderSortIcon('quantity')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('buyPrice')}
+          >
+            <div className="flex items-center justify-end">
+              Buy Price
+              {renderSortIcon('buyPrice')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('currentPrice')}
+          >
+            <div className="flex items-center justify-end">
+              Current Price
+              {renderSortIcon('currentPrice')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('investedAmount')}
+          >
+            <div className="flex items-center justify-end">
+              Invested
+              {renderSortIcon('investedAmount')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('currentValue')}
+          >
+            <div className="flex items-center justify-end">
+              Current Value
+              {renderSortIcon('currentValue')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('pnl')}
+          >
+            <div className="flex items-center justify-end">
+              P&L
+              {renderSortIcon('pnl')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 text-right"
+            onClick={() => handleSort('pnlPercentage')}
+          >
+            <div className="flex items-center justify-end">
+              P&L %
+              {renderSortIcon('pnlPercentage')}
+            </div>
+          </TableHead>
+          <TableHead className="w-[50px]">Actions</TableHead>
+        </TableRow>
+      </ResponsiveTableHeader>
+      <ResponsiveTableBody>
+        {sortedStocks.map((stock) => (
+          <TableRow key={stock.id} className="hover:bg-muted/50">
+            <TableCell className="font-medium">
+              <div>
+                <div className="font-semibold">{stock.companyName}</div>
+                <div className="text-sm text-muted-foreground">{stock.symbol}</div>
               </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('symbol')}
-            >
-              <div className="flex items-center">
-                Symbol
-                {renderSortIcon('symbol')}
+            </TableCell>
+            <TableCell>
+              <Badge variant="outline" className="font-mono">
+                {stock.symbol}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="text-sm">{stock.sector}</div>
+            </TableCell>
+            <TableCell>
+              <Badge variant={getMarketCapVariant(stock.marketCap)}>
+                {stock.marketCap}
+              </Badge>
+            </TableCell>
+            <TableCell className="text-right font-mono">
+              {stock.quantity?.toLocaleString('en-IN') || 0}
+            </TableCell>
+            <TableCell className="text-right font-mono">
+              {formatCurrency(stock.buyPrice)}
+            </TableCell>
+            <TableCell className="text-right font-mono">
+              <div className="flex flex-col items-end">
+                <span>{formatCurrency(stock.currentPrice)}</span>
+                <span className="text-xs text-muted-foreground">Live prices</span>
               </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('sector')}
-            >
-              <div className="flex items-center">
-                Sector
-                {renderSortIcon('sector')}
+            </TableCell>
+            <TableCell className="text-right font-mono">
+              {formatCurrency(stock.investedAmount)}
+            </TableCell>
+            <TableCell className="text-right font-mono">
+              {formatCurrency(stock.currentValue)}
+            </TableCell>
+            <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
+              <div className="flex flex-col items-end">
+                <span className="font-semibold">
+                  {formatCurrency(stock.pnl)}
+                </span>
               </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('marketCap')}
-            >
-              <div className="flex items-center">
-                Market Cap
-                {renderSortIcon('marketCap')}
+            </TableCell>
+            <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
+              <div className="flex flex-col items-end">
+                <span className="font-semibold">
+                  {formatPercentage(stock.pnlPercentage)}
+                </span>
               </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('quantity')}
-            >
-              <div className="flex items-center justify-end">
-                Quantity
-                {renderSortIcon('quantity')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('buyPrice')}
-            >
-              <div className="flex items-center justify-end">
-                Buy Price
-                {renderSortIcon('buyPrice')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('currentPrice')}
-            >
-              <div className="flex items-center justify-end">
-                Current Price
-                {renderSortIcon('currentPrice')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('investedAmount')}
-            >
-              <div className="flex items-center justify-end">
-                Invested
-                {renderSortIcon('investedAmount')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('currentValue')}
-            >
-              <div className="flex items-center justify-end">
-                Current Value
-                {renderSortIcon('currentValue')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('pnl')}
-            >
-              <div className="flex items-center justify-end">
-                P&L
-                {renderSortIcon('pnl')}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/50 text-right"
-              onClick={() => handleSort('pnlPercentage')}
-            >
-              <div className="flex items-center justify-end">
-                P&L %
-                {renderSortIcon('pnlPercentage')}
-              </div>
-            </TableHead>
-            <TableHead className="w-[50px]">Actions</TableHead>
+            </TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit(stock)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onDelete(stock)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedStocks.map((stock) => (
-            <TableRow key={stock.id} className="hover:bg-muted/50">
-              <TableCell className="font-medium">
-                <div>
-                  <div className="font-semibold">{stock.companyName}</div>
-                  <div className="text-sm text-muted-foreground">{stock.symbol}</div>
+        ))}
+      </ResponsiveTableBody>
+      
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-4 p-4">
+        {sortedStocks.map((stock) => (
+          <MobileCard key={stock.id}>
+            <div className="space-y-3">
+              {/* Company name and actions */}
+              <div className="flex justify-between items-start">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-sm truncate">{stock.companyName}</h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge variant="outline" className="text-xs font-mono">
+                      {stock.symbol}
+                    </Badge>
+                    <Badge variant={getMarketCapVariant(stock.marketCap)} className="text-xs">
+                      {stock.marketCap}
+                    </Badge>
+                  </div>
                 </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="font-mono">
-                  {stock.symbol}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">{stock.sector}</div>
-              </TableCell>
-              <TableCell>
-                <Badge variant={getMarketCapVariant(stock.marketCap)}>
-                  {stock.marketCap}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right font-mono">
-                {stock.quantity?.toLocaleString('en-IN') || 0}
-              </TableCell>
-              <TableCell className="text-right font-mono">
-                {formatCurrency(stock.buyPrice)}
-              </TableCell>
-              <TableCell className="text-right font-mono">
-                <div className="flex flex-col items-end">
-                  <span>{formatCurrency(stock.currentPrice)}</span>
-                  <span className="text-xs text-muted-foreground">Live prices</span>
+                <div className="flex space-x-1 ml-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(stock)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(stock)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              </TableCell>
-              <TableCell className="text-right font-mono">
-                {formatCurrency(stock.investedAmount)}
-              </TableCell>
-              <TableCell className="text-right font-mono">
-                {formatCurrency(stock.currentValue)}
-              </TableCell>
-              <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
-                <div className="flex flex-col items-end">
-                  <span className="font-semibold">
-                    {formatCurrency(stock.pnl)}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
-                <div className="flex flex-col items-end">
-                  <span className="font-semibold">
-                    {formatPercentage(stock.pnlPercentage)}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(stock)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => onDelete(stock)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+              </div>
+              
+              {/* Sector */}
+              <MobileField 
+                label="Sector" 
+                value={stock.sector} 
+              />
+              
+              {/* Quantity and prices */}
+              <div className="space-y-1">
+                <MobileField 
+                  label="Quantity" 
+                  value={stock.quantity?.toLocaleString('en-IN') || 0} 
+                />
+                <MobileField 
+                  label="Buy Price" 
+                  value={formatCurrency(stock.buyPrice)} 
+                />
+                <MobileField 
+                  label="Current Price" 
+                  value={
+                    <div className="text-right">
+                      <div>{formatCurrency(stock.currentPrice)}</div>
+                      <div className="text-xs text-muted-foreground">Live prices</div>
+                    </div>
+                  } 
+                />
+              </div>
+              
+              {/* Investment values */}
+              <div className="space-y-1">
+                <MobileField 
+                  label="Invested" 
+                  value={formatCurrency(stock.investedAmount)} 
+                />
+                <MobileField 
+                  label="Current Value" 
+                  value={formatCurrency(stock.currentValue)} 
+                />
+                <MobileField 
+                  label="P&L" 
+                  value={
+                    <div className={`text-right ${getPnLColor(stock.pnl)}`}>
+                      <div className="font-semibold">{formatCurrency(stock.pnl)}</div>
+                      <div className="text-sm">{formatPercentage(stock.pnlPercentage)}</div>
+                    </div>
+                  } 
+                />
+              </div>
+            </div>
+          </MobileCard>
+        ))}
+      </div>
+    </ResponsiveTable>
   )
 })
 

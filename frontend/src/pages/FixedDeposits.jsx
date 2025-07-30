@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button'
 import { SummaryCard } from '@/components/common/SummaryCard'
 import { FDCard } from '@/components/fixed-deposits/FDCard'
 import { AddFDModal } from '@/components/fixed-deposits/AddFDModal'
+import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { formatPercentage } from '@/lib/utils'
+import { toast } from '@/lib/toast'
 import { Plus, Download, AlertCircle } from 'lucide-react'
 
 export const FixedDeposits = observer(() => {
@@ -51,13 +53,28 @@ export const FixedDeposits = observer(() => {
     setShowAddModal(true)
   }
 
-  const handleDeleteFD = async (fd) => {
-    if (window.confirm(`Are you sure you want to delete the ${fd.bankName} FD?\n\nThis action cannot be undone.`)) {
+  const [deletingFD, setDeletingFD] = useState(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteFD = (fd) => {
+    setDeletingFD(fd)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteFD = async () => {
+    if (deletingFD) {
+      setIsDeleting(true)
       try {
-        await portfolioStore.deleteFixedDeposit(fd.id)
+        await portfolioStore.deleteFixedDeposit(deletingFD.id)
+        toast.crud.deleted('Fixed deposit')
+        setShowDeleteDialog(false)
+        setDeletingFD(null)
       } catch (error) {
         console.error('Failed to delete FD:', error)
-        alert('Failed to delete fixed deposit. Please try again.')
+        toast.crud.deleteError('Fixed deposit')
+      } finally {
+        setIsDeleting(false)
       }
     }
   }
@@ -79,19 +96,20 @@ export const FixedDeposits = observer(() => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Fixed Deposits</h1>
-          <p className="text-muted-foreground mt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Fixed Deposits</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Track your fixed deposit investments and maturity progress
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport} className="gap-2">
+        <div className="flex gap-2 flex-shrink-0">
+          <Button variant="outline" onClick={handleExport} size="sm" className="sm:size-default gap-2">
             <Download className="h-4 w-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
+            <span className="sm:hidden">Export</span>
           </Button>
-          <Button onClick={handleAddFD} className="gap-2">
+          <Button onClick={handleAddFD} size="sm" className="sm:size-default gap-2">
             <Plus className="h-4 w-4" />
             Add FD
           </Button>
@@ -99,7 +117,7 @@ export const FixedDeposits = observer(() => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <SummaryCard
           title="Total Invested"
           value={fdSummary.totalInvested}
@@ -128,10 +146,10 @@ export const FixedDeposits = observer(() => {
 
       {/* Fixed Deposits Grid */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground">Your Fixed Deposits</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">Your Fixed Deposits</h2>
           {fixedDeposits.length > 0 && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {fixedDeposits.length} FD{fixedDeposits.length !== 1 ? 's' : ''} • 
               {fixedDeposits.filter(fd => fd.isMaturingSoon).length} maturing soon
             </p>
@@ -139,7 +157,7 @@ export const FixedDeposits = observer(() => {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(3)].map((_, index) => (
               <FDCard key={index} loading={true} />
             ))}
@@ -183,7 +201,7 @@ export const FixedDeposits = observer(() => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {fixedDeposits.map((fd) => (
               <FDCard
                 key={fd.id}
@@ -202,6 +220,18 @@ export const FixedDeposits = observer(() => {
         onOpenChange={setShowAddModal}
         editingFD={editingFD}
         onClose={handleCloseModal}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Fixed Deposit"
+        itemName={`${deletingFD?.bankName} FD`}
+        itemType="fixed deposit"
+        onConfirm={confirmDeleteFD}
+        loading={isDeleting}
+        additionalWarning="All maturity calculations and interest data will be permanently removed."
       />
     </div>
   )

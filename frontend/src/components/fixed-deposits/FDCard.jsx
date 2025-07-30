@@ -120,7 +120,7 @@ export const FDCard = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(fixedDeposit)}
-                className="h-8 w-8 p-0"
+                className="h-9 w-9 p-0 sm:h-8 sm:w-8"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -128,7 +128,7 @@ export const FDCard = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onDelete(fixedDeposit)}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                className="h-9 w-9 p-0 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

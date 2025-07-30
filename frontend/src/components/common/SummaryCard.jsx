@@ -1,8 +1,10 @@
 import React from 'react'
+import { observer } from 'mobx-react-lite'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency, getValueColor } from '@/lib/utils'
+import { getValueColor } from '@/lib/utils'
+import { usePreferencesStore } from '@/stores/StoreContext'
 
-export const SummaryCard = ({ 
+export const SummaryCard = observer(({ 
   title, 
   value, 
   change, 
@@ -10,6 +12,7 @@ export const SummaryCard = ({
   loading = false,
   error = null 
 }) => {
+  const preferencesStore = usePreferencesStore()
   if (loading) {
     return (
       <Card>
@@ -48,21 +51,22 @@ export const SummaryCard = ({
 
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+      <CardHeader className="pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-mono text-foreground">
-          {typeof value === 'number' ? formatCurrency(value) : value}
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="text-lg sm:text-2xl font-bold font-mono text-foreground break-all">
+          {typeof value === 'number' ? preferencesStore.formatCurrency(value) : value}
         </div>
         {change !== undefined && (
-          <p className={`text-xs mt-1 ${getValueColor(parseFloat(change))}`}>
-            {change} {changeLabel}
+          <p className={`text-xs mt-1 ${getValueColor(parseFloat(change))} truncate`}>
+            {typeof change === 'number' ? preferencesStore.formatPercentage(change) : change} 
+            <span className="hidden sm:inline"> {changeLabel}</span>
           </p>
         )}
       </CardContent>
     </Card>
   )
-}
+})

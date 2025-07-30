@@ -61,7 +61,7 @@ export function Sidebar({ isOpen, onToggle }) {
       <div 
         data-tour="sidebar"
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-border transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-0",
+          "fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0 lg:transition-none",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -96,10 +96,10 @@ export function Sidebar({ isOpen, onToggle }) {
                 data-tour={item.name === 'Settings' ? 'settings-nav' : undefined}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center space-x-3 px-3 py-3 sm:py-2.5 rounded-lg text-sm font-medium transition-colors touch-manipulation",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent active:bg-accent"
                   )
                 }
                 onClick={() => {
@@ -109,8 +109,8 @@ export function Sidebar({ isOpen, onToggle }) {
                   }
                 }}
               >
-                <Icon className="w-5 h-5" />
-                <span>{item.name}</span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">{item.name}</span>
               </NavLink>
             )
           })}

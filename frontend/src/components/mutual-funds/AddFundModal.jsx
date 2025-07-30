@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { portfolioStore } from '@/stores/PortfolioStore'
+import { mutualFundSchema } from '@/lib/validationSchemas'
+import { toast } from '@/lib/toast'
 
 const CATEGORIES = [
   'Large Cap',
@@ -28,128 +34,72 @@ const RISK_LEVELS = [
 ]
 
 export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    riskLevel: '',
-    rating: '',
-    investedAmount: '',
-    currentValue: ''
+  const form = useForm({
+    resolver: zodResolver(mutualFundSchema),
+    defaultValues: {
+      name: '',
+      category: '',
+      riskLevel: '',
+      rating: 1,
+      investedAmount: 0,
+      currentValue: 0
+    }
   })
-  const [errors, setErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { handleSubmit, reset, formState: { isSubmitting, errors }, watch } = form
 
   // Reset form when modal opens/closes or when editing fund changes
   useEffect(() => {
     if (open) {
       if (editingFund) {
-        setFormData({
+        reset({
           name: editingFund.name || '',
           category: editingFund.category || '',
           riskLevel: editingFund.riskLevel || '',
-          rating: editingFund.rating?.toString() || '',
-          investedAmount: editingFund.investedAmount?.toString() || '',
-          currentValue: editingFund.currentValue?.toString() || ''
+          rating: editingFund.rating || 1,
+          investedAmount: editingFund.investedAmount || 0,
+          currentValue: editingFund.currentValue || 0
         })
       } else {
-        setFormData({
+        reset({
           name: '',
           category: '',
           riskLevel: '',
-          rating: '',
-          investedAmount: '',
-          currentValue: ''
+          rating: 1,
+          investedAmount: 0,
+          currentValue: 0
         })
       }
-      setErrors({})
     }
-  }, [open, editingFund])
+  }, [open, editingFund, reset])
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Fund name is required'
-    }
-
-    if (!formData.category) {
-      newErrors.category = 'Category is required'
-    }
-
-    if (!formData.riskLevel) {
-      newErrors.riskLevel = 'Risk level is required'
-    }
-
-    if (!formData.rating) {
-      newErrors.rating = 'Rating is required'
-    } else {
-      const rating = parseInt(formData.rating)
-      if (isNaN(rating) || rating < 1 || rating > 5) {
-        newErrors.rating = 'Rating must be between 1 and 5'
-      }
-    }
-
-    if (!formData.investedAmount) {
-      newErrors.investedAmount = 'Invested amount is required'
-    } else {
-      const amount = parseFloat(formData.investedAmount)
-      if (isNaN(amount) || amount <= 0) {
-        newErrors.investedAmount = 'Invested amount must be a positive number'
-      }
-    }
-
-    if (!formData.currentValue) {
-      newErrors.currentValue = 'Current value is required'
-    } else {
-      const amount = parseFloat(formData.currentValue)
-      if (isNaN(amount) || amount < 0) {
-        newErrors.currentValue = 'Current value must be a non-negative number'
-      }
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
-    setIsSubmitting(true)
-
+  const onSubmit = async (data) => {
     try {
       const fundData = {
-        name: formData.name.trim(),
-        category: formData.category,
-        riskLevel: formData.riskLevel,
-        rating: parseInt(formData.rating),
-        investedAmount: parseFloat(formData.investedAmount),
-        currentValue: parseFloat(formData.currentValue)
+        name: data.name.trim(),
+        category: data.category,
+        riskLevel: data.riskLevel,
+        rating: data.rating,
+        investedAmount: data.investedAmount,
+        currentValue: data.currentValue
       }
 
       if (editingFund) {
         await portfolioStore.updateMutualFund(editingFund.id, fundData)
+        toast.crud.updated('Mutual fund')
       } else {
         await portfolioStore.addMutualFund(fundData)
+        toast.crud.created('Mutual fund')
       }
 
       handleClose()
     } catch (error) {
       console.error('Failed to save fund:', error)
-      setErrors({ submit: 'Failed to save fund. Please try again.' })
-    } finally {
-      setIsSubmitting(false)
+      if (editingFund) {
+        toast.crud.updateError('Mutual fund')
+      } else {
+        toast.crud.createError('Mutual fund')
+      }
     }
   }
 
@@ -176,141 +126,166 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Fund Name *</Label>
-            <Input
-              id="name"
-              placeholder="e.g., SBI Blue Chip Fund"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              className={errors.name ? 'border-destructive' : ''}
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fund Name *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., SBI Blue Chip Fund"
+                      {...field}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name}</p>
-            )}
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => handleInputChange('category', value)}
-              >
-                <SelectTrigger className={errors.category ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.category && (
-                <p className="text-sm text-destructive">{errors.category}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="riskLevel">Risk Level *</Label>
-              <Select 
-                value={formData.riskLevel} 
-                onValueChange={(value) => handleInputChange('riskLevel', value)}
-              >
-                <SelectTrigger className={errors.riskLevel ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="Select risk level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {RISK_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.riskLevel && (
-                <p className="text-sm text-destructive">{errors.riskLevel}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="rating">Rating (1-5 stars) *</Label>
-            <Select 
-              value={formData.rating} 
-              onValueChange={(value) => handleInputChange('rating', value)}
-            >
-              <SelectTrigger className={errors.rating ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select rating" />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <SelectItem key={rating} value={rating.toString()}>
-                    {rating} Star{rating > 1 ? 's' : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.rating && (
-              <p className="text-sm text-destructive">{errors.rating}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="investedAmount">Invested Amount (₹) *</Label>
-              <Input
-                id="investedAmount"
-                type="number"
-                placeholder="10000"
-                min="0"
-                step="0.01"
-                value={formData.investedAmount}
-                onChange={(e) => handleInputChange('investedAmount', e.target.value)}
-                className={errors.investedAmount ? 'border-destructive' : ''}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIES.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.investedAmount && (
-                <p className="text-sm text-destructive">{errors.investedAmount}</p>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="currentValue">Current Value (₹) *</Label>
-              <Input
-                id="currentValue"
-                type="number"
-                placeholder="12000"
-                min="0"
-                step="0.01"
-                value={formData.currentValue}
-                onChange={(e) => handleInputChange('currentValue', e.target.value)}
-                className={errors.currentValue ? 'border-destructive' : ''}
+              <FormField
+                control={form.control}
+                name="riskLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Risk Level *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select risk level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {RISK_LEVELS.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.currentValue && (
-                <p className="text-sm text-destructive">{errors.currentValue}</p>
-              )}
             </div>
-          </div>
 
-          {errors.submit && (
-            <p className="text-sm text-destructive">{errors.submit}</p>
-          )}
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rating (1-5 stars) *</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()} disabled={isSubmitting}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select rating" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <SelectItem key={rating} value={rating.toString()}>
+                          {rating} Star{rating > 1 ? 's' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting 
-                ? (editingFund ? 'Updating...' : 'Adding...') 
-                : (editingFund ? 'Update Fund' : 'Add Fund')
-              }
-            </Button>
-          </DialogFooter>
-        </form>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="investedAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invested Amount (₹) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="10000"
+                        min="0"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="currentValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Value (₹) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="12000"
+                        min="0"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    {editingFund ? 'Updating...' : 'Adding...'}
+                  </>
+                ) : (
+                  editingFund ? 'Update Fund' : 'Add Fund'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

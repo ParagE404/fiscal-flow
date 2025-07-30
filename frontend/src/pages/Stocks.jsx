@@ -3,16 +3,19 @@ import { observer } from 'mobx-react-lite'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { Plus, Download, TrendingUp, TrendingDown } from 'lucide-react'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import StocksList from '@/components/stocks/StocksList'
 import AddStockModal from '@/components/stocks/AddStockModal'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export const Stocks = observer(() => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingStock, setEditingStock] = useState(null)
   const [stockToDelete, setStockToDelete] = useState(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const { stocks, loading, error } = portfolioStore
 
@@ -67,14 +70,24 @@ export const Stocks = observer(() => {
   }
 
   // Handle delete stock
-  const handleDeleteStock = async (stock) => {
-    if (window.confirm(`Are you sure you want to delete ${stock.companyName} (${stock.symbol})?`)) {
+  const handleDeleteStock = (stock) => {
+    setStockToDelete(stock)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteStock = async () => {
+    if (stockToDelete) {
+      setIsDeleting(true)
       try {
-        await portfolioStore.deleteStock(stock.id)
-        toast.success('Stock deleted successfully')
+        await portfolioStore.deleteStock(stockToDelete.id)
+        toast.crud.deleted('Stock')
+        setShowDeleteDialog(false)
+        setStockToDelete(null)
       } catch (error) {
         console.error('Error deleting stock:', error)
-        toast.error('Failed to delete stock')
+        toast.crud.deleteError('Stock')
+      } finally {
+        setIsDeleting(false)
       }
     }
   }
@@ -131,20 +144,21 @@ export const Stocks = observer(() => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Stock Portfolio</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Stock Portfolio</h1>
           <div className="flex items-center space-x-2 mt-1">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-muted-foreground">Live prices</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Live prices</span>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleExport}>
+        <div className="flex space-x-2 flex-shrink-0">
+          <Button variant="outline" onClick={handleExport} size="sm" className="sm:size-default">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            <span className="hidden sm:inline">Export</span>
+            <span className="sm:hidden">Export</span>
           </Button>
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button onClick={() => setShowAddModal(true)} size="sm" className="sm:size-default">
             <Plus className="mr-2 h-4 w-4" />
             Add Stock
           </Button>
@@ -152,7 +166,7 @@ export const Stocks = observer(() => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {summaryCards.map((card, index) => {
           const IconComponent = card.icon
           return (
@@ -208,6 +222,18 @@ export const Stocks = observer(() => {
         open={showAddModal}
         onClose={handleModalClose}
         editStock={editingStock}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Stock"
+        itemName={`${stockToDelete?.companyName} (${stockToDelete?.symbol})`}
+        itemType="stock"
+        onConfirm={confirmDeleteStock}
+        loading={isDeleting}
+        additionalWarning="All transaction history and P&L data will be permanently removed."
       />
     </div>
   )
