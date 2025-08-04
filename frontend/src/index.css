@@ -2794,3 +2794,116 @@ rsal Select Fix */
   background: #f9fafb !important;
   color: #111827 !important;
 }
+/* Enhanced Select Item Styling */
+[data-radix-select-item] {
+  padding: 10px 12px 10px 40px !important;
+  border-radius: 6px !important;
+  margin: 2px 4px !important;
+  transition: all 150ms ease !important;
+}
+
+[data-radix-select-item]:hover {
+  background-color: #f9fafb !important;
+}
+
+[data-radix-select-item][data-highlighted] {
+  background-color: #f0fdfa !important;
+  color: #134e4a !important;
+}
+
+/* Enhanced tick indicator */
+[data-radix-select-item] [data-radix-select-item-indicator] {
+  width: 20px !important;
+  height: 20px !important;
+  left: 8px !important;
+}
+
+[data-radix-select-item] [data-radix-select-item-indicator] > div {
+  background-color: #0d9488 !important;
+  border-radius: 50% !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[data-radix-select-item] [data-radix-select-item-indicator] svg {
+  color: white !important;
+  width: 12px !important;
+  height: 12px !important;
+  font-weight: bold !important;
+} /* 
+Enhanced Select Component Styling */
+.enhanced-select-dropdown {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 9999;
+}
+
+.enhanced-select-option {
+  padding: 10px 12px 10px 40px;
+  border-radius: 6px;
+  margin: 2px 4px;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.enhanced-select-option:hover {
+  background-color: #f9fafb;
+}
+
+.enhanced-select-option.selected {
+  background-color: #f0fdfa;
+  color: #134e4a;
+}
+
+.enhanced-select-custom-option {
+  color: #2563eb;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.enhanced-select-custom-option:hover {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Search input in dropdown */
+.enhanced-select-search {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px;
+}
+
+.enhanced-select-search input {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+/* Custom input section */
+.enhanced-select-custom-input {
+  padding: 8px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.enhanced-select-custom-input input {
+  margin-bottom: 8px;
+}
+
+.enhanced-select-custom-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.enhanced-select-custom-buttons button {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+}

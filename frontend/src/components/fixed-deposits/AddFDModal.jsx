@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { EnhancedSelect } from '@/components/ui/enhanced-select'
 import { Label } from '@/components/ui/label'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { portfolioStore } from '@/stores/PortfolioStore'
@@ -266,24 +267,21 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="bankName">Bank Name *</Label>
-            <Select 
-              value={formData.bankName} 
+            <EnhancedSelect
+              options={BANKS.filter(bank => bank !== 'Other')}
+              value={formData.bankName}
               onValueChange={(value) => handleInputChange('bankName', value)}
-            >
-              <SelectTrigger className={errors.bankName ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select bank" />
-              </SelectTrigger>
-              <SelectContent>
-                {BANKS.map((bank) => (
-                  <SelectItem key={bank} value={bank}>
-                    {bank}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Select or type bank name..."
+              allowCustom={true}
+              customPlaceholder="Enter bank name..."
+              className={errors.bankName ? 'border-destructive' : ''}
+            />
             {errors.bankName && (
               <p className="text-sm text-destructive">{errors.bankName}</p>
             )}
+            <p className="text-xs text-muted-foreground">
+              Select from popular banks or add your own custom bank name
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -325,21 +323,13 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
 
           <div className="space-y-2">
             <Label htmlFor="type">FD Type *</Label>
-            <Select 
-              value={formData.type} 
-              onValueChange={(value) => handleInputChange('type', value)}
-            >
-              <SelectTrigger className={errors.type ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select FD type" />
-              </SelectTrigger>
-              <SelectContent>
-                {FD_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type} Interest
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EnhancedSelect
+              options={FD_TYPES.map(type => `${type} Interest`)}
+              value={formData.type ? `${formData.type} Interest` : ''}
+              onValueChange={(value) => handleInputChange('type', value.replace(' Interest', ''))}
+              placeholder="Select FD type..."
+              className={errors.type ? 'border-destructive' : ''}
+            />
             {errors.type && (
               <p className="text-sm text-destructive">{errors.type}</p>
             )}
