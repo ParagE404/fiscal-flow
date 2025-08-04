@@ -1,17 +1,13 @@
-import React from 'react'
-import { observer } from 'mobx-react-lite'
-import { Menu, Bell, User, AlertTriangle, CheckCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useUser } from '../../contexts/UserContext'
+import React from "react";
+import { observer } from "mobx-react-lite";
+import { Menu, Bell, User, AlertTriangle, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useUser } from "../../contexts/UserContext";
 
 export const Header = observer(({ onMenuToggle, title, subtitle }) => {
-  const { 
-    isAuthenticated, 
-    user, 
-    needsEmailVerification, 
-    userDisplayName 
-  } = useUser()
+  const { isAuthenticated, user, needsEmailVerification, userDisplayName } =
+    useUser();
   return (
     <header className="bg-white border-b border-border px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
@@ -28,9 +24,13 @@ export const Header = observer(({ onMenuToggle, title, subtitle }) => {
 
           {/* Page title */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{subtitle}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">
+                {subtitle}
+              </p>
             )}
           </div>
         </div>
@@ -46,8 +46,8 @@ export const Header = observer(({ onMenuToggle, title, subtitle }) => {
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 p-0 flex items-center justify-center text-xs"
             >
               3
@@ -74,7 +74,7 @@ export const Header = observer(({ onMenuToggle, title, subtitle }) => {
                 )}
               </div>
             )}
-            
+
             <Button variant="ghost" size="icon" className="relative">
               <User className="w-4 h-4 sm:w-5 sm:h-5" />
               {needsEmailVerification && (
@@ -85,5 +85,5 @@ export const Header = observer(({ onMenuToggle, title, subtitle }) => {
         </div>
       </div>
     </header>
-  )
-})
+  );
+});

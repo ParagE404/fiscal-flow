@@ -1,0 +1,1549 @@
+{
+  "testSuites": [
+    {
+      "id": "chrome-mobile-home",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homedashboard",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homestocks",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homemutual-funds",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homefixed-deposits",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homesettings",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-mobile-homebrowser-compatibility-test",
+      "browser": "chrome",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-home",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homedashboard",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homestocks",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homemutual-funds",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homefixed-deposits",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homesettings",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-tablet-homebrowser-compatibility-test",
+      "browser": "chrome",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-home",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homedashboard",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homestocks",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homemutual-funds",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homefixed-deposits",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homesettings",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "chrome-desktop-homebrowser-compatibility-test",
+      "browser": "chrome",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-home",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homedashboard",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homestocks",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homemutual-funds",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homefixed-deposits",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homesettings",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-mobile-homebrowser-compatibility-test",
+      "browser": "firefox",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-home",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homedashboard",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homestocks",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homemutual-funds",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homefixed-deposits",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homesettings",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-tablet-homebrowser-compatibility-test",
+      "browser": "firefox",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-home",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homedashboard",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homestocks",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homemutual-funds",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homefixed-deposits",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homesettings",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "firefox-desktop-homebrowser-compatibility-test",
+      "browser": "firefox",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-home",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homedashboard",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homestocks",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homemutual-funds",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homefixed-deposits",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homesettings",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-mobile-homebrowser-compatibility-test",
+      "browser": "safari",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-home",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homedashboard",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homestocks",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homemutual-funds",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homefixed-deposits",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homesettings",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-tablet-homebrowser-compatibility-test",
+      "browser": "safari",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-home",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homedashboard",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homestocks",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homemutual-funds",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homefixed-deposits",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homesettings",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "safari-desktop-homebrowser-compatibility-test",
+      "browser": "safari",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-home",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homedashboard",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homestocks",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homemutual-funds",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homefixed-deposits",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homesettings",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-mobile-homebrowser-compatibility-test",
+      "browser": "edge",
+      "viewport": {
+        "name": "mobile",
+        "width": 375,
+        "height": 667
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-home",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homedashboard",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homestocks",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homemutual-funds",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homefixed-deposits",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homesettings",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-tablet-homebrowser-compatibility-test",
+      "browser": "edge",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-home",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homedashboard",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/dashboard",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homestocks",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/stocks",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homemutual-funds",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/mutual-funds",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homefixed-deposits",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/fixed-deposits",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homesettings",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/settings",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    },
+    {
+      "id": "edge-desktop-homebrowser-compatibility-test",
+      "browser": "edge",
+      "viewport": {
+        "name": "desktop",
+        "width": 1920,
+        "height": 1080
+      },
+      "page": "/browser-compatibility-test",
+      "tests": [
+        "layout-consistency",
+        "animation-performance",
+        "responsive-behavior",
+        "color-accuracy",
+        "font-rendering",
+        "interaction-feedback"
+      ]
+    }
+  ],
+  "timestamp": "2025-07-31T09:40:05.802Z",
+  "browsers": [
+    "chrome",
+    "firefox",
+    "safari",
+    "edge"
+  ],
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 375,
+      "height": 667
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "name": "desktop",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "pages": [
+    "/",
+    "/dashboard",
+    "/stocks",
+    "/mutual-funds",
+    "/fixed-deposits",
+    "/settings",
+    "/browser-compatibility-test"
+  ]
+}

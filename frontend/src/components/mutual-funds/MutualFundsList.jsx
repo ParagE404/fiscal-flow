@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton, SkeletonTable } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
+import { RefreshCw } from 'lucide-react'
 import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { MobileCard, MobileField, ResponsiveTable, ResponsiveTableHeader, ResponsiveTableBody } from '@/components/ui/responsive-table'
 import { Edit, Trash2, Star, ArrowUpDown } from 'lucide-react'
@@ -128,27 +130,14 @@ export const MutualFundsList = observer(() => {
 
   if (loading.mutualFunds) {
     return (
-      <Card>
+      <Card className="modern-card">
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-48" />
+            <Skeleton variant="title" className="w-48" />
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            ))}
-          </div>
+          <SkeletonTable rows={5} columns={8} />
         </CardContent>
       </Card>
     )
@@ -156,11 +145,21 @@ export const MutualFundsList = observer(() => {
 
   if (error.mutualFunds) {
     return (
-      <Card>
+      <Card className="modern-card">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="text-destructive">Error loading mutual funds: {error.mutualFunds}</div>
-          </div>
+          <ErrorState
+            title="Failed to load mutual funds"
+            message={error.mutualFunds}
+            type="error"
+            actions={[
+              {
+                label: "Retry",
+                onClick: () => window.location.reload(),
+                icon: RefreshCw,
+                variant: "default"
+              }
+            ]}
+          />
         </CardContent>
       </Card>
     )

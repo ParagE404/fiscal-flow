@@ -1,0 +1,15 @@
+
+/* Edge-specific fixes */
+@supports (-ms-ime-align:auto) {
+  /* Edge flexbox fixes */
+  .flex {
+    display: -ms-flexbox;
+    display: flex;
+  }
+  
+  /* Edge grid fixes */
+  .grid {
+    display: -ms-grid;
+    display: grid;
+  }
+}

@@ -61,8 +61,11 @@ export function Sidebar({ isOpen, onToggle }) {
       <div 
         data-tour="sidebar"
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0 lg:transition-none",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed left-0 top-0 z-50 h-screen w-64 transform bg-card border-r border-border transition-transform duration-300 ease-in-out flex flex-col",
+          // Desktop: always visible and static
+          "lg:translate-x-0 lg:static lg:z-0 lg:transition-none",
+          // Mobile/Tablet: slide in/out based on isOpen state
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Header */}
@@ -86,7 +89,7 @@ export function Sidebar({ isOpen, onToggle }) {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2">
           {navigationItems.map((item) => {
             const Icon = item.icon
             return (
@@ -117,10 +120,10 @@ export function Sidebar({ isOpen, onToggle }) {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        <div className="p-4 border-t border-border mt-auto">
           <div className="text-xs text-muted-foreground text-center">
             <div className="flex items-center justify-center space-x-1 mb-1">
-              <div className="w-2 h-2 bg-success-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-success rounded-full"></div>
               <span>Live prices</span>
             </div>
             <p>Personal Finance Dashboard</p>

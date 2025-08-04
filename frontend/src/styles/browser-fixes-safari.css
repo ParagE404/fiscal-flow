@@ -1,0 +1,23 @@
+
+/* Safari-specific fixes */
+@media not all and (min-resolution:.001dpcm) {
+  @supports (-webkit-appearance:none) {
+    /* Safari flexbox fixes */
+    .flex {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: flex;
+    }
+    
+    /* Safari backdrop-filter fix */
+    .backdrop-blur {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Safari smooth scrolling */
+    html {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

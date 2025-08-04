@@ -1,0 +1,134 @@
+
+/* Responsive Testing Utilities */
+
+/* Breakpoint indicators (visible in development) */
+.breakpoint-indicator {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.breakpoint-indicator::before {
+  content: 'xs';
+}
+
+@media (min-width: 640px) {
+  .breakpoint-indicator::before {
+    content: 'sm';
+  }
+}
+
+@media (min-width: 768px) {
+  .breakpoint-indicator::before {
+    content: 'md';
+  }
+}
+
+@media (min-width: 1024px) {
+  .breakpoint-indicator::before {
+    content: 'lg';
+  }
+}
+
+@media (min-width: 1280px) {
+  .breakpoint-indicator::before {
+    content: 'xl';
+  }
+}
+
+@media (min-width: 1536px) {
+  .breakpoint-indicator::before {
+    content: '2xl';
+  }
+}
+
+/* Grid overlay for layout testing */
+.grid-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background-image: 
+    linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.grid-overlay.active {
+  opacity: 1;
+}
+
+/* Touch target testing */
+.touch-target-test {
+  position: relative;
+}
+
+.touch-target-test::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border: 2px dashed rgba(255, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.touch-target-test.show-targets::after {
+  opacity: 1;
+}
+
+/* Animation performance testing */
+.perf-test-element {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  border-radius: 50%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.perf-test-transform {
+  animation: perfTestTransform 1s ease-in-out infinite alternate;
+}
+
+.perf-test-layout {
+  animation: perfTestLayout 1s ease-in-out infinite alternate;
+}
+
+@keyframes perfTestTransform {
+  from { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  to { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+}
+
+@keyframes perfTestLayout {
+  from { 
+    width: 50px; 
+    height: 50px; 
+    margin-top: 0; 
+  }
+  to { 
+    width: 60px; 
+    height: 60px; 
+    margin-top: -5px; 
+  }
+}

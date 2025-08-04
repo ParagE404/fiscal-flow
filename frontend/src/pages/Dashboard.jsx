@@ -1,97 +1,132 @@
-import React, { useEffect } from 'react'
-import { observer } from 'mobx-react-lite'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SummaryCard } from '@/components/common/SummaryCard'
-import { AssetAllocationChart } from '@/components/dashboard/AssetAllocationChart'
-import { TopPerformers } from '@/components/dashboard/TopPerformers'
-import { usePortfolioStore } from '@/stores/StoreContext'
-import { formatPercentage } from '@/lib/utils'
+import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SummaryCard } from "@/components/common/SummaryCard";
+import { AssetAllocationChart } from "@/components/dashboard/AssetAllocationChart";
+import { TopPerformers } from "@/components/dashboard/TopPerformers";
+import {
+  FadeInAnimation,
+  StaggeredAnimation,
+  ScrollRevealAnimation,
+} from "@/components/common/EntranceAnimations";
+import {
+  LoadingOverlay,
+  StaggeredLoadingCards,
+} from "@/components/common/LoadingState";
+import { usePortfolioStore } from "@/stores/StoreContext";
+import { formatPercentage } from "@/lib/utils";
 
 export const Dashboard = observer(() => {
-  const portfolioStore = usePortfolioStore()
+  const portfolioStore = usePortfolioStore();
 
   useEffect(() => {
     // Fetch dashboard data when component mounts
-    portfolioStore.fetchDashboardData()
-  }, [portfolioStore])
+    portfolioStore.fetchDashboardData();
+  }, [portfolioStore]);
 
   const summaryData = [
-    { 
-      title: 'Total Portfolio Value', 
+    {
+      title: "Total Portfolio Value",
       value: portfolioStore.totalPortfolioValue,
-      change: formatPercentage(portfolioStore.totalReturnsPercentage, true)
+      change: formatPercentage(portfolioStore.totalReturnsPercentage, true),
     },
-    { 
-      title: 'Total Invested', 
+    {
+      title: "Total Invested",
       value: portfolioStore.totalInvested,
-      change: '+0.00%' // Base investment doesn't change
+      change: "+0.00%", // Base investment doesn't change
     },
-    { 
-      title: 'Monthly Growth', 
+    {
+      title: "Monthly Growth",
       value: portfolioStore.monthlyGrowth.value,
-      change: formatPercentage(portfolioStore.monthlyGrowth.percentage, true)
+      change: formatPercentage(portfolioStore.monthlyGrowth.percentage, true),
     },
-    { 
-      title: 'Total Returns', 
+    {
+      title: "Total Returns",
       value: portfolioStore.totalReturns,
-      change: formatPercentage(portfolioStore.totalReturnsPercentage, true)
+      change: formatPercentage(portfolioStore.totalReturnsPercentage, true),
     },
-  ]
-
-
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Welcome message */}
-      <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-6 border border-primary-200">
-        <h2 className="text-xl font-semibold text-primary-900 mb-2">
-          Welcome back! 👋
-        </h2>
-        <p className="text-primary-700">
-          Here's an overview of your investment portfolio performance.
-        </p>
-      </div>
+    <div className="w-full max-w-7xl mx-auto space-y-6 lg:space-y-8">
+      {/* Welcome message with entrance animation */}
+      <FadeInAnimation delay={0}>
+        <div className="bg-gradient-to-r from-primary-blue-50 to-primary-blue-100 rounded-2xl p-4 sm:p-6 lg:p-8 border border-primary-blue-200 shadow-sm hover:shadow-md transition-all duration-300">
+          <h2 className="text-h3 font-semibold text-primary-blue-900 mb-3">
+            Welcome back! 👋
+          </h2>
+          <p className="text-body text-primary-blue-700 leading-relaxed">
+            Here's an overview of your investment portfolio performance.
+          </p>
+        </div>
+      </FadeInAnimation>
 
-      {/* Summary cards */}
-      <div data-tour="summary-cards" className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {summaryData.map((item, index) => (
-          <SummaryCard
-            key={index}
-            title={item.title}
-            value={item.value}
-            change={item.change}
-            loading={portfolioStore.loading.dashboard}
-            error={portfolioStore.error.dashboard}
-          />
-        ))}
-      </div>
+      {/* Summary cards with enhanced spacing and staggered animation */}
+      <LoadingOverlay
+        isLoading={portfolioStore.loading.dashboard}
+        skeleton={<StaggeredLoadingCards count={4} />}
+      >
+        <div
+          data-tour="summary-cards"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+        >
+          {/* <StaggeredAnimation staggerDelay={100} initialDelay={200}> */}
+            {summaryData.map((item, index) => (
+              <SummaryCard
+                key={index}
+                title={item.title}
+                value={item.value}
+                change={item.change}
+                loading={false} // Handled by LoadingOverlay
+                error={portfolioStore.error.dashboard}
+              />
+            ))}
+          {/* </StaggeredAnimation> */}
+        </div>
+      </LoadingOverlay>
 
-      {/* Asset allocation and top performers */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        <Card data-tour="asset-allocation">
-          <CardHeader>
-            <CardTitle>Asset Allocation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AssetAllocationChart 
-              assetAllocation={portfolioStore.assetAllocation}
-              loading={portfolioStore.loading.dashboard}
-            />
-          </CardContent>
-        </Card>
+      {/* Enhanced asset allocation and top performers with improved hierarchy */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        <ScrollRevealAnimation animation="fadeLeft">
+          <Card data-tour="asset-allocation" className="modern-card h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-h4 font-semibold text-foreground flex items-center gap-2">
+                <div className="w-2 h-8 bg-gradient-to-b from-primary-blue-500 to-primary-blue-600 rounded-full"></div>
+                Asset Allocation
+              </CardTitle>
+              <p className="text-body-sm text-muted-foreground mt-1">
+                Distribution of your investment portfolio
+              </p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <AssetAllocationChart
+                assetAllocation={portfolioStore.assetAllocation}
+                loading={portfolioStore.loading.dashboard}
+              />
+            </CardContent>
+          </Card>
+        </ScrollRevealAnimation>
 
-        <Card data-tour="top-performers">
-          <CardHeader>
-            <CardTitle>Top Performers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TopPerformers 
-              topPerformers={portfolioStore.topPerformers}
-              loading={portfolioStore.loading.dashboard}
-            />
-          </CardContent>
-        </Card>
+        <ScrollRevealAnimation animation="fadeRight">
+          <Card data-tour="top-performers" className="modern-card h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-h4 font-semibold text-foreground flex items-center gap-2">
+                <div className="w-2 h-8 bg-gradient-to-b from-primary-green-500 to-primary-green-600 rounded-full"></div>
+                Top Performers
+              </CardTitle>
+              <p className="text-body-sm text-muted-foreground mt-1">
+                Your best performing investments
+              </p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <TopPerformers
+                topPerformers={portfolioStore.topPerformers}
+                loading={portfolioStore.loading.dashboard}
+              />
+            </CardContent>
+          </Card>
+        </ScrollRevealAnimation>
       </div>
     </div>
-  )
-})
+  );
+});

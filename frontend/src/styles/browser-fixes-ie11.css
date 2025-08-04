@@ -1,0 +1,20 @@
+
+/* IE11 fallbacks */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  /* IE11 flexbox fallback */
+  .flex {
+    display: -ms-flexbox;
+    display: flex;
+  }
+  
+  /* IE11 grid fallback */
+  .grid {
+    display: table;
+    width: 100%;
+  }
+  
+  .grid > * {
+    display: table-cell;
+    vertical-align: top;
+  }
+}

@@ -1,0 +1,15 @@
+
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+  /* Firefox button fixes */
+  button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+  
+  /* Firefox grid fixes */
+  .grid {
+    display: -moz-grid;
+    display: grid;
+  }
+}

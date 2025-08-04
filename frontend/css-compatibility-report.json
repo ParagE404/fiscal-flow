@@ -1,0 +1,149 @@
+{
+  "files": [
+    {
+      "filename": "src/index.css",
+      "size": 69689,
+      "issues": [
+        {
+          "type": "compatibility",
+          "severity": "medium",
+          "message": "transform may need vendor prefixes for older browsers",
+          "property": "transform"
+        },
+        {
+          "type": "compatibility",
+          "severity": "medium",
+          "message": "transition may need vendor prefixes for older browsers",
+          "property": "transition"
+        },
+        {
+          "type": "compatibility",
+          "severity": "medium",
+          "message": "animation may need vendor prefixes for older browsers",
+          "property": "animation"
+        },
+        {
+          "type": "compatibility",
+          "severity": "medium",
+          "message": "backdrop-filter may need vendor prefixes for older browsers",
+          "property": "backdrop-filter"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "High usage of box-shadow (77 instances) may impact performance",
+          "suggestion": "Consider using fewer shadows or CSS-only alternatives"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "High usage of will-change (14 instances) may impact memory",
+          "suggestion": "Only use will-change on elements that will actually change"
+        },
+        {
+          "type": "accessibility",
+          "severity": "high",
+          "message": "Some interactive elements may be missing focus styles",
+          "suggestion": "Ensure all interactive elements have visible focus indicators"
+        }
+      ],
+      "recommendations": [
+        {
+          "type": "fallback",
+          "message": "Consider providing fallbacks for CSS Grid (suggestion: flexbox or float layouts)",
+          "feature": "CSS Grid"
+        },
+        {
+          "type": "fallback",
+          "message": "Consider providing fallbacks for CSS Custom Properties (suggestion: Sass variables)",
+          "feature": "CSS Custom Properties"
+        },
+        {
+          "type": "fallback",
+          "message": "Consider providing fallbacks for backdrop-filter (suggestion: solid background colors)",
+          "feature": "backdrop-filter"
+        },
+        {
+          "type": "accessibility",
+          "message": "Verify color contrast ratios meet WCAG AA standards (4.5:1 for normal text)",
+          "suggestion": "Use automated tools to check color contrast"
+        }
+      ],
+      "features": {
+        "customProperties": 247,
+        "animations": 48,
+        "transforms": 175,
+        "transitions": 43,
+        "gradients": 48,
+        "flexbox": 7,
+        "grid": 5
+      }
+    }
+  ],
+  "issues": [
+    {
+      "type": "compatibility",
+      "severity": "medium",
+      "message": "transform may need vendor prefixes for older browsers",
+      "property": "transform"
+    },
+    {
+      "type": "compatibility",
+      "severity": "medium",
+      "message": "transition may need vendor prefixes for older browsers",
+      "property": "transition"
+    },
+    {
+      "type": "compatibility",
+      "severity": "medium",
+      "message": "animation may need vendor prefixes for older browsers",
+      "property": "animation"
+    },
+    {
+      "type": "compatibility",
+      "severity": "medium",
+      "message": "backdrop-filter may need vendor prefixes for older browsers",
+      "property": "backdrop-filter"
+    },
+    {
+      "type": "performance",
+      "severity": "medium",
+      "message": "High usage of box-shadow (77 instances) may impact performance",
+      "suggestion": "Consider using fewer shadows or CSS-only alternatives"
+    },
+    {
+      "type": "performance",
+      "severity": "medium",
+      "message": "High usage of will-change (14 instances) may impact memory",
+      "suggestion": "Only use will-change on elements that will actually change"
+    },
+    {
+      "type": "accessibility",
+      "severity": "high",
+      "message": "Some interactive elements may be missing focus styles",
+      "suggestion": "Ensure all interactive elements have visible focus indicators"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "fallback",
+      "message": "Consider providing fallbacks for CSS Grid (suggestion: flexbox or float layouts)",
+      "feature": "CSS Grid"
+    },
+    {
+      "type": "fallback",
+      "message": "Consider providing fallbacks for CSS Custom Properties (suggestion: Sass variables)",
+      "feature": "CSS Custom Properties"
+    },
+    {
+      "type": "fallback",
+      "message": "Consider providing fallbacks for backdrop-filter (suggestion: solid background colors)",
+      "feature": "backdrop-filter"
+    },
+    {
+      "type": "accessibility",
+      "message": "Verify color contrast ratios meet WCAG AA standards (4.5:1 for normal text)",
+      "suggestion": "Use automated tools to check color contrast"
+    }
+  ]
+}

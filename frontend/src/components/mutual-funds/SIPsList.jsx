@@ -5,7 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Edit, Trash2, ArrowUpDown, Play, Pause, CheckCircle } from 'lucide-react'
+import { Edit, Trash2, ArrowUpDown, Play, Pause, CheckCircle, RefreshCw } from 'lucide-react'
+import { ErrorState } from '@/components/ui/error-state'
+import { DataLoading } from '@/components/ui/loading-states'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { formatCurrency } from '@/lib/utils'
 import { AddSIPModal } from './AddSIPModal'
@@ -138,11 +140,12 @@ export const SIPsList = observer(() => {
 
   if (loading.sips) {
     return (
-      <Card>
+      <Card className="modern-card">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="text-muted-foreground">Loading SIPs...</div>
-          </div>
+          <DataLoading 
+            title="Loading SIPs..."
+            description="Fetching your systematic investment plans"
+          />
         </CardContent>
       </Card>
     )
@@ -150,11 +153,21 @@ export const SIPsList = observer(() => {
 
   if (error.sips) {
     return (
-      <Card>
+      <Card className="modern-card">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="text-destructive">Error loading SIPs: {error.sips}</div>
-          </div>
+          <ErrorState
+            title="Failed to load SIPs"
+            message={error.sips}
+            type="error"
+            actions={[
+              {
+                label: "Retry",
+                onClick: () => window.location.reload(),
+                icon: RefreshCw,
+                variant: "default"
+              }
+            ]}
+          />
         </CardContent>
       </Card>
     )
