@@ -2686,3 +2686,111 @@ button.gradient-primary,
 .gradient-primary {
   color: white !important;
 }
+/* Modal/Dialog Enhancements */
+[data-radix-dialog-content] {
+  background-color: white !important;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Ensure modal text is readable */
+[data-radix-dialog-content] * {
+  color: hsl(var(--foreground));
+}
+
+/* Modal overlay improvements */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+}
+/ * Popover and Dropdown Enhancements */ [data-radix-popper-content-wrapper] {
+  z-index: 9999;
+}
+
+[data-radix-select-content],
+[data-radix-dropdown-menu-content],
+[data-radix-tooltip-content] {
+  background-color: white !important;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure all popup text is readable */
+[data-radix-select-content] *,
+[data-radix-dropdown-menu-content] *,
+[data-radix-tooltip-content] * {
+  color: hsl(var(--foreground));
+}
+/ * General Component Contrast Improvements */ .card,
+[data-radix-dialog-content],
+[data-radix-select-content],
+[data-radix-dropdown-menu-content] {
+  background-color: white;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Ensure form elements in modals are visible */
+[data-radix-dialog-content] input,
+[data-radix-dialog-content] select,
+[data-radix-dialog-content] textarea {
+  background-color: white;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+/* Fix Select Dropdown Transparency */
+[data-radix-select-content] {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  color: #1f2937 !important;
+  z-index: 9999 !important;
+}
+
+[data-radix-select-item] {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+[data-radix-select-trigger] {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  color: #1f2937 !important;
+}
+
+/* Fix all Radix UI components in modals */
+[data-radix-dialog-content] [data-radix-select-content] {
+  background-color: white !important;
+  opacity: 1 !important;
+} /* Unive
+rsal Select Fix */
+.select-content,
+[role="listbox"],
+[data-state="open"][data-radix-collection-item] {
+  background: white !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Ensure select items are visible */
+[role="option"],
+[data-radix-select-item] {
+  background: white !important;
+  color: #374151 !important;
+  padding: 8px 12px !important;
+}
+
+[role="option"]:hover,
+[data-radix-select-item]:hover {
+  background: #f9fafb !important;
+  color: #111827 !important;
+}
