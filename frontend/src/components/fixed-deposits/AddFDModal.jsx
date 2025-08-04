@@ -496,7 +496,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
                 <span className="text-sm font-medium text-green-800">
                   {formData.payoutType === 'Maturity' ? 'Expected Maturity Amount:' : 'Principal at Maturity:'}
                 </span>
-                <span className="text-lg font-bold text-green-900 font-mono">
+                <span className="text-lg font-bold text-green-900 ">
                   ₹{maturityAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </span>
               </div>
@@ -506,7 +506,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
                   <span className="text-xs text-green-700">
                     Total Interest Earned:
                   </span>
-                  <span className="text-sm font-semibold text-green-800 font-mono">
+                  <span className="text-sm font-semibold text-green-800 ">
                     ₹{(maturityAmount - parseFloat(formData.investedAmount || 0)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 </div>
@@ -516,7 +516,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
                     <span className="text-xs text-green-700">
                       Total Interest (paid {formData.payoutType.toLowerCase()}):
                     </span>
-                    <span className="text-sm font-semibold text-green-800 font-mono">
+                    <span className="text-sm font-semibold text-green-800 ">
                       ₹{((parseFloat(formData.investedAmount || 0) * parseFloat(formData.interestRate || 0) * parseInt(formData.tenure || 0)) / (12 * 100)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </span>
                   </div>

@@ -280,6 +280,11 @@ class PortfolioStore {
       runInAction(() => {
         this.sips.push(newSIP)
       })
+      
+      // Refresh mutual funds list in case a new fund was created
+      // This happens when user selects "None (Create new fund entry)"
+      await this.fetchMutualFunds()
+      
       return newSIP
     } catch (error) {
       this.setError('sips', error.message)
@@ -296,6 +301,10 @@ class PortfolioStore {
           this.sips[index] = updatedSIP
         }
       })
+      
+      // Refresh mutual funds list in case SIP investment amounts changed
+      await this.fetchMutualFunds()
+      
       return updatedSIP
     } catch (error) {
       this.setError('sips', error.message)
@@ -309,6 +318,9 @@ class PortfolioStore {
       runInAction(() => {
         this.sips = this.sips.filter(sip => sip.id !== id)
       })
+      
+      // Refresh mutual funds list in case SIP investment amounts changed
+      await this.fetchMutualFunds()
     } catch (error) {
       this.setError('sips', error.message)
       throw error

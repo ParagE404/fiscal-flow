@@ -22,6 +22,7 @@ const STATUSES = [
 
 export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }) => {
   const [formData, setFormData] = useState({
+    mutualFundId: '',
     fundName: '',
     amount: '',
     frequency: '',
@@ -42,6 +43,7 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
           : ''
         
         setFormData({
+          mutualFundId: editingSIP.mutualFundId || '',
           fundName: editingSIP.fundName || '',
           amount: editingSIP.amount?.toString() || '',
           frequency: editingSIP.frequency || '',
@@ -57,6 +59,7 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
         nextMonth.setDate(1) // Set to 1st of next month
         
         setFormData({
+          mutualFundId: '',
           fundName: '',
           amount: '',
           frequency: 'Monthly',
@@ -108,6 +111,23 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
     if (!editingSIP) {
       const nextDue = calculateNextDueDate(frequency)
       handleInputChange('nextDueDate', nextDue)
+    }
+  }
+
+  const handleMutualFundChange = (mutualFundId) => {
+    // Convert "none" to empty string for storage
+    const actualMutualFundId = mutualFundId === 'none' ? '' : mutualFundId
+    handleInputChange('mutualFundId', actualMutualFundId)
+    
+    // Auto-fill fund name if mutual fund is selected
+    if (actualMutualFundId) {
+      const selectedFund = portfolioStore.mutualFunds.find(fund => fund.id === actualMutualFundId)
+      if (selectedFund) {
+        handleInputChange('fundName', selectedFund.name)
+      }
+    } else {
+      // Clear fund name if no mutual fund selected
+      handleInputChange('fundName', '')
     }
   }
 
@@ -182,6 +202,7 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
 
     try {
       const sipData = {
+        mutualFundId: formData.mutualFundId || null,
         fundName: formData.fundName.trim(),
         amount: parseFloat(formData.amount),
         frequency: formData.frequency,
@@ -194,7 +215,18 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
       if (editingSIP) {
         await portfolioStore.updateSIP(editingSIP.id, sipData)
       } else {
-        await portfolioStore.addSIP(sipData)
+        const newSIP = await portfolioStore.addSIP(sipData)
+        
+        // Show additional message if a new mutual fund was likely created
+        if (!formData.mutualFundId && formData.fundName) {
+          // Check if this fund name is new by looking at existing funds
+          const existingFund = portfolioStore.mutualFunds.find(fund => 
+            fund.name.toLowerCase() === formData.fundName.toLowerCase()
+          )
+          if (!existingFund) {
+            console.log('New mutual fund entry may have been created for:', formData.fundName)
+          }
+        }
       }
 
       handleClose()
@@ -231,6 +263,29 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="mutualFund">Link to Existing Mutual Fund (Optional)</Label>
+            <Select 
+              value={formData.mutualFundId || 'none'} 
+              onValueChange={handleMutualFundChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select existing mutual fund or leave blank for new" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Create new fund entry)</SelectItem>
+                {portfolioStore.mutualFunds.map((fund) => (
+                  <SelectItem key={fund.id} value={fund.id}>
+                    {fund.name} ({fund.category})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Link this SIP to an existing mutual fund to track combined investments
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="fundName">Fund Name *</Label>
             <Input
               id="fundName"
@@ -238,9 +293,15 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
               value={formData.fundName}
               onChange={(e) => handleInputChange('fundName', e.target.value)}
               className={errors.fundName ? 'border-destructive' : ''}
+              disabled={!!formData.mutualFundId}
             />
             {errors.fundName && (
               <p className="text-sm text-destructive">{errors.fundName}</p>
+            )}
+            {formData.mutualFundId && (
+              <p className="text-xs text-muted-foreground">
+                Fund name is auto-filled from selected mutual fund
+              </p>
             )}
           </div>
 

@@ -158,7 +158,7 @@
       "Segoe UI", sans-serif;
     --font-body: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
-    --font-mono: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+    --: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
 
     /* Spacing System */
     --space-px: 1px;
@@ -291,8 +291,8 @@
 
   /* Typography Classes */
 
-  .font-mono {
-    font-family: var(--font-mono);
+  . {
+    font-family: var(--);
   }
 
   /* Modern Typography Scale with Responsive Sizing */
@@ -418,7 +418,7 @@
 
   /* Financial number display */
   .text-financial {
-    font-family: var(--font-mono);
+    font-family: var(--);
     font-variant-numeric: tabular-nums;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -2268,7 +2268,7 @@ nancial Data Card Enhancements */
 }
 
 .asset-value {
-  font-family: var(--font-mono);
+  font-family: var(--);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -2346,7 +2346,7 @@ nancial Data Card Enhancements */
 }
 
 .tooltip-value {
-  font-family: var(--font-mono);
+  font-family: var(--);
   font-weight: 500;
   color: hsl(var(--primary));
 }
@@ -2910,15 +2910,21 @@ Enhanced Select Component Styling */
 /* Fix Edit Button Icon Visibility on Hover */
 .financial-data-card button[class*="ghost"] {
   color: #6b7280 !important; /* Gray-500 */
+  background-color: transparent !important;
 }
 
 .financial-data-card button[class*="ghost"]:hover {
-  color: #374151 !important; /* Gray-700 */
-  background-color: rgba(59, 130, 246, 0.1) !important; /* Blue background */
+  color: #374151 !important; /* Dark gray text on hover */
+  background-color: #f3f4f6 !important; /* Light gray background on hover */
+  transform: translateY(-1px) !important;
 }
 
 .financial-data-card button[class*="ghost"] svg {
   color: inherit !important;
+}
+
+.financial-data-card button[class*="ghost"]:hover svg {
+  color: #374151 !important; /* Dark gray color for icons on hover */
 }
 
 /* Ensure delete button stays red */
@@ -2927,8 +2933,17 @@ Enhanced Select Component Styling */
 }
 
 .financial-data-card button[class*="ghost"].text-destructive:hover {
-  color: #b91c1c !important; /* Red-700 */
-  background-color: rgba(220, 38, 38, 0.1) !important; /* Red background */
+  color: #b91c1c !important; /* Darker red text on hover */
+  background-color: #fef2f2 !important; /* Light red background on hover */
+  transform: translateY(-1px) !important;
+}
+
+.financial-data-card button[class*="ghost"].text-destructive:hover svg {
+  color: #b91c1c !important; /* Darker red color for delete icon on hover */
+}
+
+.financial-data-card button[class*="ghost"].text-destructive:hover svg {
+  color: #ffffff !important; /* Force white color for delete icon on hover */
 }
 
 /* Progress bar improvements */

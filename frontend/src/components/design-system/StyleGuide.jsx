@@ -107,7 +107,7 @@ const StyleGuide = () => {
       onClick={() => copyToClipboard(`var(--${name})`, name)}
     >
       <div className="flex-1">
-        <code className="text-sm font-mono text-blue-600">--{name}</code>
+        <code className="text-sm  text-blue-600">--{name}</code>
         {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
       </div>
       <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ const StyleGuide = () => {
               {Object.entries(typographyTokens).map(([name, token]) => (
                 <div key={name} className="border-b border-gray-100 pb-4 last:border-b-0">
                   <div className="flex items-center justify-between mb-2">
-                    <code className="text-sm font-mono text-blue-600">.text-{name}</code>
+                    <code className="text-sm  text-blue-600">.text-{name}</code>
                     <Badge variant="outline">{token.usage}</Badge>
                   </div>
                   <div className={`text-${name} mb-2`}>
@@ -278,7 +278,7 @@ const StyleGuide = () => {
                   {['space-2', 'space-4', 'space-6', 'space-8'].map(space => (
                     <div key={space} className="text-center">
                       <div 
-                        className="bg-blue-100 border-2 border-blue-300 rounded mb-2 flex items-center justify-center text-xs font-mono"
+                        className="bg-blue-100 border-2 border-blue-300 rounded mb-2 flex items-center justify-center text-xs "
                         style={{ padding: `var(--${space})` }}
                       >
                         {space}
@@ -529,7 +529,7 @@ const StyleGuide = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <h4 className="text-h4 mb-3">Common Classes</h4>
-              <ul className="space-y-1 text-sm font-mono">
+              <ul className="space-y-1 text-sm ">
                 <li>.modern-card</li>
                 <li>.btn-modern</li>
                 <li>.card-hover</li>
@@ -540,7 +540,7 @@ const StyleGuide = () => {
             </div>
             <div>
               <h4 className="text-h4 mb-3">Animation Classes</h4>
-              <ul className="space-y-1 text-sm font-mono">
+              <ul className="space-y-1 text-sm ">
                 <li>.transition-fast</li>
                 <li>.hover-lift</li>
                 <li>.mobile-touch</li>
@@ -551,7 +551,7 @@ const StyleGuide = () => {
             </div>
             <div>
               <h4 className="text-h4 mb-3">Utility Classes</h4>
-              <ul className="space-y-1 text-sm font-mono">
+              <ul className="space-y-1 text-sm ">
                 <li>.touch-target</li>
                 <li>.gpu-accelerated</li>
                 <li>.shadow-primary</li>

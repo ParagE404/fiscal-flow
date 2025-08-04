@@ -35,11 +35,19 @@ const calculateNextDueDate = (currentDate, frequency) => {
  */
 const getAllSIPs = async (req, res, next) => {
   try {
-    // Ensure default user exists
-    
-
     const sips = await prisma.sIP.findMany({
       where: { userId: req.user.id },
+      include: {
+        mutualFund: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            riskLevel: true,
+            rating: true
+          }
+        }
+      },
       orderBy: { nextDueDate: 'asc' }
     })
 
@@ -151,17 +159,97 @@ const getSIPById = async (req, res, next) => {
  */
 const createSIP = async (req, res, next) => {
   try {
-    // Ensure default user exists
-    
-
     const sipData = {
       ...req.body,
       userId: req.user.id
     }
 
+    let mutualFundId = sipData.mutualFundId
+
+    // If mutualFundId is provided, verify it exists and belongs to user
+    if (mutualFundId) {
+      const mutualFund = await prisma.mutualFund.findFirst({
+        where: {
+          id: mutualFundId,
+          userId: req.user.id
+        }
+      })
+
+      if (!mutualFund) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid Mutual Fund',
+          message: 'Selected mutual fund not found or does not belong to user',
+          timestamp: new Date().toISOString()
+        })
+      }
+
+      // Use the mutual fund name if not provided
+      if (!sipData.fundName) {
+        sipData.fundName = mutualFund.name
+      }
+    } else {
+      // If no mutualFundId provided, create a new mutual fund entry
+      if (sipData.fundName) {
+        // Check if a mutual fund with the same name already exists
+        const existingFund = await prisma.mutualFund.findFirst({
+          where: {
+            userId: req.user.id,
+            name: {
+              equals: sipData.fundName,
+              mode: 'insensitive'
+            }
+          }
+        })
+
+        if (existingFund) {
+          // Link to existing fund
+          mutualFundId = existingFund.id
+          sipData.mutualFundId = existingFund.id
+          console.log(`Linked SIP to existing mutual fund: ${existingFund.name} (${existingFund.id})`)
+        } else {
+          // Create new mutual fund entry
+          const newMutualFund = await prisma.mutualFund.create({
+            data: {
+              userId: req.user.id,
+              name: sipData.fundName,
+              category: 'Equity', // Default category
+              riskLevel: 'Medium', // Default risk level
+              rating: 3, // Default rating
+              investedAmount: 0, // No lump sum investment initially
+              currentValue: 0, // Will be updated later
+              cagr: 0, // Will be calculated later
+              sipInvestment: 0, // Will be calculated after SIP creation
+              totalInvestment: 0 // Will be calculated after SIP creation
+            }
+          })
+
+          mutualFundId = newMutualFund.id
+          sipData.mutualFundId = newMutualFund.id
+          console.log(`Created new mutual fund: ${newMutualFund.name} (${newMutualFund.id})`)
+        }
+      }
+    }
+
     const sip = await prisma.sIP.create({
-      data: sipData
+      data: sipData,
+      include: {
+        mutualFund: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            riskLevel: true,
+            rating: true
+          }
+        }
+      }
     })
+
+    // Update mutual fund's SIP investment amount
+    if (sip.mutualFundId) {
+      await updateMutualFundSIPInvestment(sip.mutualFundId)
+    }
 
     res.status(201).json({
       success: true,
@@ -298,8 +386,24 @@ const updateSIPStatus = async (req, res, next) => {
 
     const sip = await prisma.sIP.update({
       where: { id },
-      data: updateData
+      data: updateData,
+      include: {
+        mutualFund: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            riskLevel: true,
+            rating: true
+          }
+        }
+      }
     })
+
+    // Update mutual fund's SIP investment amount if linked
+    if (sip.mutualFundId) {
+      await updateMutualFundSIPInvestment(sip.mutualFundId)
+    }
 
     res.json({
       success: true,
@@ -351,21 +455,37 @@ const deleteSIP = async (req, res, next) => {
 }
 
 /**
- * Ensure default user exists for MVP
+ * Update mutual fund's SIP investment amount based on linked SIPs
  */
-const ensureDefaultUser = async () => {
-  const existingUser = await prisma.user.findUnique({
-    where: { id: req.user.id }
-  })
-
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
-        id: req.user.id,
-        email: 'default@fiscalflow.com',
-        name: 'Default User'
-      }
+const updateMutualFundSIPInvestment = async (mutualFundId) => {
+  try {
+    // Calculate total SIP investment for this mutual fund
+    const sips = await prisma.sIP.findMany({
+      where: { mutualFundId }
     })
+
+    const sipInvestment = sips.reduce((total, sip) => {
+      return total + (sip.completedInstallments * sip.amount)
+    }, 0)
+
+    // Get current mutual fund data
+    const mutualFund = await prisma.mutualFund.findUnique({
+      where: { id: mutualFundId }
+    })
+
+    if (mutualFund) {
+      const totalInvestment = mutualFund.investedAmount + sipInvestment
+
+      await prisma.mutualFund.update({
+        where: { id: mutualFundId },
+        data: {
+          sipInvestment,
+          totalInvestment
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Error updating mutual fund SIP investment:', error)
   }
 }
 

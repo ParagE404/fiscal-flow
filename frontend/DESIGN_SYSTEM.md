@@ -33,7 +33,7 @@ All design tokens are implemented as CSS custom properties for consistency and m
   /* Typography */
   --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  --: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
   
   /* Spacing */
   --space-1: 0.25rem; /* 4px */
@@ -82,14 +82,14 @@ All design tokens are implemented as CSS custom properties for consistency and m
 
 ```css
 .text-financial {
-  font-family: var(--font-mono);
+  font-family: var(--);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .text-financial-lg {
-  font-family: var(--font-mono);
+  font-family: var(--);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   font-size: var(--font-size-2xl);

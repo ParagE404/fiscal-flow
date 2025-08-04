@@ -256,7 +256,7 @@ const StocksList = observer(({ onEdit, onDelete }) => {
               </div>
             </TableCell>
             <TableCell>
-              <Badge variant="outline" className="font-mono">
+              <Badge variant="outline" className="">
                 {stock.symbol}
               </Badge>
             </TableCell>
@@ -268,32 +268,32 @@ const StocksList = observer(({ onEdit, onDelete }) => {
                 {stock.marketCap}
               </Badge>
             </TableCell>
-            <TableCell className="text-right font-mono">
+            <TableCell className="text-right ">
               {stock.quantity?.toLocaleString('en-IN') || 0}
             </TableCell>
-            <TableCell className="text-right font-mono">
+            <TableCell className="text-right ">
               {formatCurrency(stock.buyPrice)}
             </TableCell>
-            <TableCell className="text-right font-mono">
+            <TableCell className="text-right ">
               <div className="flex flex-col items-end">
                 <span>{formatCurrency(stock.currentPrice)}</span>
                 <span className="text-xs text-muted-foreground">Live prices</span>
               </div>
             </TableCell>
-            <TableCell className="text-right font-mono">
+            <TableCell className="text-right ">
               {formatCurrency(stock.investedAmount)}
             </TableCell>
-            <TableCell className="text-right font-mono">
+            <TableCell className="text-right ">
               {formatCurrency(stock.currentValue)}
             </TableCell>
-            <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
+            <TableCell className={`text-right  ${getPnLColor(stock.pnl)}`}>
               <div className="flex flex-col items-end">
                 <span className="font-semibold">
                   {formatCurrency(stock.pnl)}
                 </span>
               </div>
             </TableCell>
-            <TableCell className={`text-right font-mono ${getPnLColor(stock.pnl)}`}>
+            <TableCell className={`text-right  ${getPnLColor(stock.pnl)}`}>
               <div className="flex flex-col items-end">
                 <span className="font-semibold">
                   {formatPercentage(stock.pnlPercentage)}
@@ -337,7 +337,7 @@ const StocksList = observer(({ onEdit, onDelete }) => {
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-sm truncate">{stock.companyName}</h3>
                   <div className="flex items-center space-x-2 mt-1">
-                    <Badge variant="outline" className="text-xs font-mono">
+                    <Badge variant="outline" className="text-xs ">
                       {stock.symbol}
                     </Badge>
                     <Badge variant={getMarketCapVariant(stock.marketCap)} className="text-xs">

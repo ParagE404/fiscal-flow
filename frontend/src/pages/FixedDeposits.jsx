@@ -9,7 +9,7 @@ import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { formatPercentage } from '@/lib/utils'
 import { toast } from '@/lib/toast'
-import { Plus, Download, AlertCircle } from 'lucide-react'
+import { Plus, Download, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
 
 export const FixedDeposits = observer(() => {
   const [fdSummary, setFdSummary] = useState({
@@ -84,9 +84,48 @@ export const FixedDeposits = observer(() => {
     setEditingFD(null)
   }
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Export FDs clicked')
+  const [exportState, setExportState] = useState('idle')
+
+  const downloadCSV = (csvData, filename) => {
+    try {
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      link.setAttribute('href', url)
+      link.setAttribute('download', filename)
+      link.style.visibility = 'hidden'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading CSV:', error)
+      throw new Error('Failed to download file')
+    }
+  }
+
+  const handleExport = async () => {
+    setExportState('loading')
+    
+    try {
+      const { apiClient } = await import('@/lib/apiClient')
+      const csvData = await apiClient.exportFixedDeposits()
+      const filename = `fixed_deposits_export_${new Date().toISOString().split('T')[0]}.csv`
+      
+      downloadCSV(csvData, filename)
+      setExportState('success')
+      toast.success('Fixed deposits data exported successfully')
+      
+      // Reset success state after 2 seconds
+      setTimeout(() => setExportState('idle'), 2000)
+    } catch (error) {
+      console.error('Error exporting fixed deposits:', error)
+      setExportState('idle')
+      toast.error('Failed to export fixed deposits data')
+    }
   }
 
   const { fixedDeposits, loading, error } = portfolioStore
@@ -104,10 +143,32 @@ export const FixedDeposits = observer(() => {
           </p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <Button variant="outline" onClick={handleExport} size="sm" className="sm:size-default gap-2">
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export CSV</span>
-            <span className="sm:hidden">Export</span>
+          <Button 
+            variant="outline" 
+            onClick={handleExport} 
+            size="sm" 
+            className="sm:size-default gap-2"
+            disabled={exportState === 'loading'}
+          >
+            {exportState === 'loading' ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Exporting...</span>
+                <span className="sm:hidden">...</span>
+              </>
+            ) : exportState === 'success' ? (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Exported!</span>
+                <span className="sm:hidden">✓</span>
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
+              </>
+            )}
           </Button>
           <Button onClick={handleAddFD} size="sm" className="sm:size-default gap-2">
             <Plus className="h-4 w-4" />

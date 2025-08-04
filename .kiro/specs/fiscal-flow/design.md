@@ -320,7 +320,7 @@ model SIP {
 **Typography:**
 - Headings: font-semibold, text-xl/2xl/3xl
 - Body: font-normal, text-sm/base
-- Numbers: font-mono for financial values
+- Numbers:  for financial values
 - Currency: ₹ symbol with proper Indian formatting
 
 **Components:**

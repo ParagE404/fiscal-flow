@@ -13,11 +13,25 @@ const getAllMutualFunds = async (req, res, next) => {
   try {
     const mutualFunds = await prisma.mutualFund.findMany({
       where: { userId: req.user.id },
+      include: {
+        sips: {
+          select: {
+            id: true,
+            amount: true,
+            frequency: true,
+            status: true,
+            completedInstallments: true,
+            totalInstallments: true,
+            nextDueDate: true
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     })
 
     // Calculate summary
     const totalInvested = mutualFunds.reduce((sum, fund) => sum + fund.investedAmount, 0)
+    const totalSIPInvestment = mutualFunds.reduce((sum, fund) => sum + fund.sipInvestment, 0)
     const totalCurrentValue = mutualFunds.reduce((sum, fund) => sum + fund.currentValue, 0)
     
     // Calculate overall CAGR (simplified - assumes all investments started at the same time)
@@ -27,8 +41,10 @@ const getAllMutualFunds = async (req, res, next) => {
 
     const summary = {
       totalInvested,
+      totalSIPInvestment,
+      totalInvestment: totalInvested + totalSIPInvestment,
       totalCurrentValue,
-      totalReturns: totalCurrentValue - totalInvested,
+      totalReturns: totalCurrentValue - (totalInvested + totalSIPInvestment),
       avgCAGR,
       totalFunds: mutualFunds.length
     }

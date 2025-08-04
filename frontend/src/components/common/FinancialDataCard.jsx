@@ -216,7 +216,7 @@ export const FinancialDataCard = ({
                 <p className="text-xs sm:text-sm text-muted-foreground mb-1">
                   {assetType === 'fixed-deposit' ? 'Current Value' : 'Primary Value'}
                 </p>
-                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isPrimaryAnimating ? 'text-primary scale-105' : 'text-blue-600'}`}>
+                <p className={`text-lg sm:text-xl font-bold  transition-all duration-300 ${isPrimaryAnimating ? 'text-primary scale-105' : 'text-blue-600'}`}>
                   {formatAnimatedValue(animatedPrimary, isPrimaryAnimating)}
                 </p>
               </div>
@@ -226,7 +226,7 @@ export const FinancialDataCard = ({
                 <p className="text-xs sm:text-sm text-muted-foreground mb-1">
                   {assetType === 'fixed-deposit' ? 'Maturity Amount' : 'Secondary Value'}
                 </p>
-                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isSecondaryAnimating ? 'text-primary scale-105' : 'text-green-600'}`}>
+                <p className={`text-lg sm:text-xl font-bold  transition-all duration-300 ${isSecondaryAnimating ? 'text-primary scale-105' : 'text-green-600'}`}>
                   {formatAnimatedValue(animatedSecondary, isSecondaryAnimating)}
                 </p>
               </div>

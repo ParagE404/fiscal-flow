@@ -192,7 +192,8 @@ export const MutualFundsList = observer(() => {
                 <SortableHeader field="category">Category</SortableHeader>
                 <SortableHeader field="riskLevel">Risk Level</SortableHeader>
                 <SortableHeader field="rating">Rating</SortableHeader>
-                <SortableHeader field="investedAmount">Invested</SortableHeader>
+                <SortableHeader field="investedAmount">Lump Sum</SortableHeader>
+                <SortableHeader field="sipInvestment">SIP Investment</SortableHeader>
                 <SortableHeader field="currentValue">Current Value</SortableHeader>
                 <SortableHeader field="cagr">CAGR</SortableHeader>
                 <TableHead>Actions</TableHead>
@@ -200,10 +201,12 @@ export const MutualFundsList = observer(() => {
             </ResponsiveTableHeader>
             <ResponsiveTableBody>
               {sortedFunds.map((fund) => {
-                const returns = (fund.currentValue || 0) - (fund.investedAmount || 0)
-                const returnsPercentage = fund.investedAmount > 0 
-                  ? (returns / fund.investedAmount) * 100 
+                const totalInvestment = (fund.investedAmount || 0) + (fund.sipInvestment || 0)
+                const returns = (fund.currentValue || 0) - totalInvestment
+                const returnsPercentage = totalInvestment > 0 
+                  ? (returns / totalInvestment) * 100 
                   : 0
+                const activeSIPs = fund.sips ? fund.sips.filter(sip => sip.status === 'Active').length : 0
 
                 return (
                   <TableRow key={fund.id} className="hover:bg-muted/50">
@@ -220,6 +223,16 @@ export const MutualFundsList = observer(() => {
                     </TableCell>
                     <TableCell>{renderStars(fund.rating || 0)}</TableCell>
                     <TableCell>{formatCurrency(fund.investedAmount || 0)}</TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div>{formatCurrency(fund.sipInvestment || 0)}</div>
+                        {activeSIPs > 0 && (
+                          <div className="text-xs text-muted-foreground">
+                            {activeSIPs} active SIP{activeSIPs > 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div>{formatCurrency(fund.currentValue || 0)}</div>

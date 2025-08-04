@@ -15,21 +15,33 @@ const {
  */
 const arrayToCSV = (data, headers) => {
   if (!data || data.length === 0) {
+    console.log('No data provided for CSV generation, returning headers only')
     return headers.map(h => sanitizeForCSV(h.label)).join(',') + '\n'
   }
 
   // Create header row
   const headerRow = headers.map(h => sanitizeForCSV(h.label)).join(',')
+  console.log(`CSV Header: ${headerRow}`)
   
   // Create data rows
-  const dataRows = data.map(row => {
-    return headers.map(header => {
+  const dataRows = data.map((row, index) => {
+    const csvRow = headers.map(header => {
       const value = row[header.key]
-      return sanitizeForCSV(formatValueForCSV(value, header.type))
+      const formattedValue = formatValueForCSV(value, header.type)
+      const sanitizedValue = sanitizeForCSV(formattedValue)
+      return sanitizedValue
     }).join(',')
-  })
+    
+    // Log first few rows for debugging
+    if (index < 3) {
+      console.log(`CSV Row ${index + 1}: ${csvRow}`)
+    }
+    
+    return csvRow
+  }).filter(row => row.trim() !== '') // Remove completely empty rows
 
-  return [headerRow, ...dataRows].join('\n')
+  console.log(`Generated ${dataRows.length} data rows`)
+  return [headerRow, ...dataRows].join('\n') + '\n'
 }
 
 /**
@@ -123,6 +135,7 @@ const generateSIPsCSV = (sips) => {
 const generateFixedDepositsCSV = (fixedDeposits) => {
   const headers = [
     { key: 'bankName', label: 'Bank Name', type: 'string' },
+    { key: 'customId', label: 'FD Reference', type: 'string' },
     { key: 'type', label: 'FD Type', type: 'string' },
     { key: 'investedAmount', label: 'Invested Amount (₹)', type: 'currency' },
     { key: 'currentValue', label: 'Current Value (₹)', type: 'currency' },
@@ -130,24 +143,80 @@ const generateFixedDepositsCSV = (fixedDeposits) => {
     { key: 'interestRate', label: 'Interest Rate (%)', type: 'percentage' },
     { key: 'interestEarned', label: 'Interest Earned (₹)', type: 'currency' },
     { key: 'tenure', label: 'Tenure (Months)', type: 'number' },
+    { key: 'payoutType', label: 'Payout Type', type: 'string' },
     { key: 'startDate', label: 'Start Date', type: 'date' },
     { key: 'maturityDate', label: 'Maturity Date', type: 'date' },
     { key: 'daysRemaining', label: 'Days Remaining', type: 'number' },
+    { key: 'status', label: 'Status', type: 'string' },
     { key: 'createdAt', label: 'Added On', type: 'date' }
   ]
 
-  const processedData = fixedDeposits.map(fd => {
-    const today = new Date()
-    const maturityDate = new Date(fd.maturityDate)
-    const daysRemaining = Math.max(0, Math.ceil((maturityDate - today) / (1000 * 60 * 60 * 24)))
-    
-    return {
-      ...fd,
-      interestEarned: fd.currentValue - fd.investedAmount,
-      daysRemaining
+  console.log(`Processing ${fixedDeposits.length} fixed deposits for CSV export`)
+
+  const processedData = fixedDeposits.map((fd, index) => {
+    try {
+      const today = new Date()
+      const maturityDate = new Date(fd.maturityDate)
+      const daysRemaining = Math.max(0, Math.ceil((maturityDate - today) / (1000 * 60 * 60 * 24)))
+      
+      // Calculate interest earned safely
+      const investedAmount = parseFloat(fd.investedAmount) || 0
+      const currentValue = parseFloat(fd.currentValue) || 0
+      const interestEarned = currentValue - investedAmount
+      
+      // Determine status
+      let status = 'Active'
+      if (daysRemaining === 0) {
+        status = 'Matured'
+      } else if (daysRemaining <= 30) {
+        status = 'Maturing Soon'
+      }
+
+      const processedFD = {
+        bankName: fd.bankName || '',
+        customId: fd.customId || '',
+        type: fd.type || '',
+        investedAmount: investedAmount,
+        currentValue: currentValue,
+        maturityAmount: parseFloat(fd.maturityAmount) || 0,
+        interestRate: parseFloat(fd.interestRate) || 0,
+        interestEarned: interestEarned,
+        tenure: parseInt(fd.tenure) || 0,
+        payoutType: fd.payoutType || 'Maturity',
+        startDate: fd.startDate,
+        maturityDate: fd.maturityDate,
+        daysRemaining: daysRemaining,
+        status: status,
+        createdAt: fd.createdAt
+      }
+
+      console.log(`Processed FD ${index + 1}:`, processedFD.bankName, processedFD.customId)
+      return processedFD
+
+    } catch (error) {
+      console.error(`Error processing FD at index ${index}:`, error)
+      // Return a minimal record to avoid empty rows
+      return {
+        bankName: fd.bankName || 'Unknown',
+        customId: fd.customId || '',
+        type: fd.type || '',
+        investedAmount: 0,
+        currentValue: 0,
+        maturityAmount: 0,
+        interestRate: 0,
+        interestEarned: 0,
+        tenure: 0,
+        payoutType: 'Maturity',
+        startDate: fd.startDate || new Date(),
+        maturityDate: fd.maturityDate || new Date(),
+        daysRemaining: 0,
+        status: 'Error',
+        createdAt: fd.createdAt || new Date()
+      }
     }
   })
 
+  console.log(`Successfully processed ${processedData.length} records for CSV`)
   return arrayToCSV(processedData, headers)
 }
 

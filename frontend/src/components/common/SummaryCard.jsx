@@ -93,7 +93,7 @@ export const SummaryCard = observer(({
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6">
-          <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground break-words group-hover:text-primary-blue-700 transition-colors duration-300 mb-2 font-mono">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground break-words group-hover:text-primary-blue-700 transition-colors duration-300 mb-2 ">
             {typeof value === 'number' ? (
               <AnimatedNumber 
                 value={value} 

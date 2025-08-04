@@ -104,7 +104,7 @@ export const FDCard = ({
         <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-blue-700">FD Reference:</span>
-            <span className="text-sm font-mono font-semibold text-blue-800">{customId}</span>
+            <span className="text-sm  font-semibold text-blue-800">{customId}</span>
           </div>
         </div>
       )}

@@ -188,7 +188,22 @@ const exportFixedDeposits = async (req, res) => {
       orderBy: { createdAt: 'desc' }
     })
 
+    console.log(`Found ${fixedDeposits.length} fixed deposits for export`)
+    
+    // Debug: Log first record to check data structure
+    if (fixedDeposits.length > 0) {
+      console.log('Sample FD record:', JSON.stringify(fixedDeposits[0], null, 2))
+    }
+
     const csvData = generateFixedDepositsCSV(fixedDeposits)
+    
+    // Debug: Log CSV data length and first few lines
+    const csvLines = csvData.split('\n')
+    console.log(`Generated CSV with ${csvLines.length} lines`)
+    console.log('First 3 lines of CSV:')
+    csvLines.slice(0, 3).forEach((line, index) => {
+      console.log(`Line ${index + 1}: "${line}"`)
+    })
 
     const filename = `fixed_deposits_export_${new Date().toISOString().split('T')[0]}.csv`
     res.setHeader('Content-Type', 'text/csv')
