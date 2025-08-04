@@ -213,16 +213,20 @@ export const FinancialDataCard = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {primaryValue !== undefined && (
               <div className="value-container">
-                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Primary Value</p>
-                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isPrimaryAnimating ? 'text-primary scale-105' : 'text-foreground'}`}>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+                  {assetType === 'fixed-deposit' ? 'Current Value' : 'Primary Value'}
+                </p>
+                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isPrimaryAnimating ? 'text-primary scale-105' : 'text-blue-600'}`}>
                   {formatAnimatedValue(animatedPrimary, isPrimaryAnimating)}
                 </p>
               </div>
             )}
             {secondaryValue !== undefined && (
               <div className="value-container">
-                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Secondary Value</p>
-                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isSecondaryAnimating ? 'text-primary scale-105' : 'text-foreground'}`}>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+                  {assetType === 'fixed-deposit' ? 'Maturity Amount' : 'Secondary Value'}
+                </p>
+                <p className={`text-lg sm:text-xl font-bold font-mono transition-all duration-300 ${isSecondaryAnimating ? 'text-primary scale-105' : 'text-green-600'}`}>
                   {formatAnimatedValue(animatedSecondary, isSecondaryAnimating)}
                 </p>
               </div>

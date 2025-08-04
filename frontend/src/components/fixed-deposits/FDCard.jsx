@@ -99,26 +99,42 @@ export const FDCard = ({
       animateNumbers={true}
     >
       {/* Investment Details */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-3 gap-3 mb-4">
         <div>
-          <p className="text-sm text-muted-foreground">Invested Amount</p>
-          <p className="text-financial font-semibold">
+          <p className="text-xs text-muted-foreground">Invested Amount</p>
+          <p className="text-sm font-semibold text-gray-700">
             {formatCurrency(investedAmount)}
           </p>
         </div>
         <div>
+          <p className="text-xs text-muted-foreground">Current Value</p>
+          <p className="text-sm font-semibold text-blue-600">
+            {formatCurrency(currentValue)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Maturity Amount</p>
+          <p className="text-sm font-semibold text-green-600">
+            {formatCurrency(maturityAmount)}
+          </p>
+        </div>
+      </div>
+
+      {/* Interest Details */}
+      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
             {payoutType === 'Maturity' ? 'Interest Earned' : 'Interest (Periodic)'}
           </p>
-          <p className={`text-financial font-semibold ${getValueColor(interestEarned)}`}>
+          <p className={`text-sm font-semibold ${getValueColor(interestEarned)}`}>
             {formatCurrency(interestEarned)}
           </p>
-          {payoutType !== 'Maturity' && (
-            <p className="text-xs text-muted-foreground">
-              Paid {payoutType.toLowerCase()}
-            </p>
-          )}
         </div>
+        {payoutType !== 'Maturity' && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Paid {payoutType.toLowerCase()}
+          </p>
+        )}
       </div>
 
       {/* Maturity Progress */}
@@ -129,14 +145,16 @@ export const FDCard = ({
             {getDaysRemainingText()}
           </p>
         </div>
-        <Progress 
-          value={Math.min(progressPercentage, 100)} 
-          className={`h-2 transition-all duration-500 ${
-            isMatured ? 'bg-green-100' : 
-            isMaturingSoon ? 'bg-orange-100' : 
-            'bg-blue-100'
-          }`}
-        />
+        <div className="fd-progress-bar">
+          <div 
+            className={`fd-progress-fill ${
+              isMatured ? 'matured' : 
+              isMaturingSoon ? 'maturing-soon' : 
+              'active'
+            }`}
+            style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+          />
+        </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />

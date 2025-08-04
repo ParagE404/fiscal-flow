@@ -2907,3 +2907,52 @@ Enhanced Select Component Styling */
   padding: 0 12px;
   font-size: 12px;
 }
+/* Fix Edit Button Icon Visibility on Hover */
+.financial-data-card button[class*="ghost"] {
+  color: #6b7280 !important; /* Gray-500 */
+}
+
+.financial-data-card button[class*="ghost"]:hover {
+  color: #374151 !important; /* Gray-700 */
+  background-color: rgba(59, 130, 246, 0.1) !important; /* Blue background */
+}
+
+.financial-data-card button[class*="ghost"] svg {
+  color: inherit !important;
+}
+
+/* Ensure delete button stays red */
+.financial-data-card button[class*="ghost"].text-destructive {
+  color: #dc2626 !important; /* Red-600 */
+}
+
+.financial-data-card button[class*="ghost"].text-destructive:hover {
+  color: #b91c1c !important; /* Red-700 */
+  background-color: rgba(220, 38, 38, 0.1) !important; /* Red background */
+}
+
+/* Progress bar improvements */
+.fd-progress-bar {
+  background-color: #e5e7eb; /* Gray-200 */
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fd-progress-fill {
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+  border-radius: 4px;
+}
+
+.fd-progress-fill.active {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8); /* Blue gradient */
+}
+
+.fd-progress-fill.maturing-soon {
+  background: linear-gradient(90deg, #f59e0b, #d97706); /* Orange gradient */
+}
+
+.fd-progress-fill.matured {
+  background: linear-gradient(90deg, #10b981, #059669); /* Green gradient */
+}
