@@ -265,8 +265,6 @@
     --info: var(--info-500);
     --info-foreground: 255 255 255;
   }
-
-  
 }
 
 @layer base {
@@ -291,9 +289,6 @@
   }
 
   /* Typography Classes */
-  
-
-  
 
   .font-mono {
     font-family: var(--font-mono);
@@ -412,8 +407,6 @@
     }
   }
 
-  
-
   /* Additional Typography Utilities */
   .text-label {
     font-size: var(--font-size-sm);
@@ -421,8 +414,6 @@
     font-weight: 500;
     font-family: var(--font-body);
   }
-
-  
 
   /* Financial number display */
   .text-financial {
@@ -432,11 +423,8 @@
     letter-spacing: -0.01em;
   }
 
-  
-
   /* Typography weight utilities */
-  
-  
+
   .font-medium {
     font-weight: 500;
   }
@@ -448,54 +436,32 @@
   }
 
   /* Letter spacing utilities */
-  
+
   .tracking-tight {
     letter-spacing: -0.025em;
   }
-  
-  
-  
-  
 }
 
 /* Typography and Animation Utilities */
 @layer utilities {
   /* Responsive Typography Utilities */
-  
 
   @media (min-width: 640px) {
-    
   }
 
-  
-
   @media (min-width: 640px) {
-    
   }
 
-  
-
   @media (min-width: 640px) {
-    
   }
 
-  
-
   @media (min-width: 640px) {
-    
   }
 
   /* Text alignment utilities */
-  
-
-  
 
   /* Font feature utilities */
-  
 
-  
-
-  
   /* GPU-Accelerated Transition Classes */
   .transition-fast {
     transition-duration: var(--duration-150);
@@ -724,7 +690,6 @@
   }
 
   /* Icon Button Enhancements */
-  
 
   .icon-btn-ripple::after {
     content: "";
@@ -746,18 +711,12 @@
   }
 
   /* Floating Action Button Enhancements */
-  
-
-  
 
   /* Fade Animations */
-  
 
   .fade-in-up {
     animation: fadeInUp var(--duration-500) var(--ease-out);
   }
-
-  
 
   /* Error State Animations */
   .animate-fade-in {
@@ -768,18 +727,11 @@
     animation: fadeInUp var(--duration-400) var(--ease-out);
   }
 
-  
-
   /* Scale Animations */
-  
 
   /* Slide Animations */
-  
-
-  
 
   /* Loading Animations */
-  
 
   .shimmer {
     background: linear-gradient(
@@ -888,27 +840,8 @@
   }
 
   /* Color utility classes for consistent usage */
-  
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
 
   /* Border color utilities */
-  
-  
-  
-  
-  
-  
 
   /* Enhanced shadow utilities */
   .shadow-3xl {
@@ -972,8 +905,6 @@
     touch-action: manipulation;
   }
 
-  
-
   /* Enhanced mobile touch feedback with GPU acceleration */
   .mobile-touch {
     -webkit-tap-highlight-color: transparent;
@@ -993,18 +924,20 @@
   }
 
   /* Swipe gesture support */
-  
-
-  
 
   .swipe-indicator::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
     transition: left var(--duration-300) var(--ease-out);
   }
 
@@ -1067,9 +1000,8 @@
   }
 
   /* Performance Optimization Utilities */
-  
+
   /* GPU Acceleration for Critical Elements */
-  
 
   /* Optimized Transitions for Low-End Devices */
   .transition-optimized {
@@ -1097,8 +1029,6 @@
     .fade-in-down,
     .scale-in,
     .slide-in-right,
-    
-
     .transition-fast,
     .transition-normal,
     .transition-slow,
@@ -1132,16 +1062,18 @@
 
   /* Optimized Gradients */
   .gradient-efficient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--primary) / 0.8) 100%
+    );
   }
 
   /* Container Queries for Performance */
   @container (min-width: 768px) {
-    
   }
 
   /* Intersection Observer Optimized Animations */
-  
 
   .animate-on-scroll
 
@@ -1181,32 +1113,6 @@
     white-space: normal;
   }
 
-  /* Skip Links */
-  .skip-links {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9999;
-  }
-
-  .skip-link {
-    position: absolute;
-    top: -40px;
-    left: 6px;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    padding: 8px 16px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: top var(--duration-200) var(--ease-out);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .skip-link:focus,
-  
-
   /* Focus Management */
   .keyboard-navigation *:focus {
     outline: 2px solid hsl(var(--ring));
@@ -1242,8 +1148,6 @@
 
     .card,
     .btn-primary,
-    
-
     .shadow-sm,
     .shadow-md,
     .shadow-lg {
@@ -1326,7 +1230,6 @@
   }
 
   /* Loading State Accessibility */
-  
 
   .loading-spinner[aria-hidden="false"] {
     /* Ensure spinner is announced to screen readers when visible */
@@ -1342,20 +1245,13 @@
   }
 
   /* Color Contrast Helpers */
-  
-
-  
-
-  
 
   /* Touch Target Accessibility */
-  
 
   /* Keyboard Navigation Helpers */
-  
 
   .keyboard-focused::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     left: -2px;
@@ -1385,8 +1281,6 @@
     /* Ensure proper focus management */
   }
 
-  
-
   /* Tooltip Accessibility */
   [role="tooltip"] {
     background: hsl(var(--popover));
@@ -1398,109 +1292,82 @@
     box-shadow: var(--shadow-md);
     z-index: 1000;
   }
-    will-change: box-shadow;
-  }
+  will-change: box-shadow;
+}
 
-  .hover-glow:hover {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-  }
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
 
-  
+.click-feedback:active {
+  transform: scale(0.95) translateZ(0);
+}
 
-  .click-feedback:active {
-    transform: scale(0.95) translateZ(0);
-  }
+/* GPU-Accelerated Interactive element states */
 
-  
+.interactive-element:hover {
+  transform: translateY(-1px) translateZ(0);
+}
 
-  
+.interactive-element:active {
+  transform: translateY(0) translateZ(0);
+  transition-duration: var(--duration-75);
+}
 
-  
+/* Focus states for accessibility */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.5);
+}
 
-  
+/* Smooth scroll behavior */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
 
-  
+/* Reveal animations */
 
-  
-
-  
-
-  /* GPU-Accelerated Interactive element states */
-  
-
-  .interactive-element:hover {
-    transform: translateY(-1px) translateZ(0);
-  }
-
-  .interactive-element:active {
-    transform: translateY(0) translateZ(0);
-    transition-duration: var(--duration-75);
-  }
-
-  /* Focus states for accessibility */
-  .focus-ring:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.5);
-  }
-
-  /* Smooth scroll behavior */
-  .smooth-scroll {
-    scroll-behavior: smooth;
-  }
-
-  /* Reveal animations */
-  
-
-  .reveal-on-scroll
+.reveal-on-scroll
 
   /* Mobile-First Responsive Utilities */
   
 
   @media (min-width: 640px) {
-    
-  }
+}
 
-  @media (min-width: 1024px) {
-    
-  }
+@media (min-width: 1024px) {
+}
 
-  
+@media (min-width: 640px) {
+}
 
-  @media (min-width: 640px) {
-    
-  }
+/* Touch-friendly spacing */
+.mobile-padding {
+  padding: 1rem;
+}
 
-  /* Touch-friendly spacing */
+@media (min-width: 640px) {
   .mobile-padding {
-    padding: 1rem;
+    padding: 1.5rem;
   }
+}
 
-  @media (min-width: 640px) {
-    .mobile-padding {
-      padding: 1.5rem;
-    }
+@media (min-width: 1024px) {
+  .mobile-padding {
+    padding: 2rem;
   }
+}
 
-  @media (min-width: 1024px) {
-    .mobile-padding {
-      padding: 2rem;
-    }
-  }
+/* Mobile-optimized card spacing */
 
-  /* Mobile-optimized card spacing */
-  
+@media (min-width: 640px) {
+}
 
-  @media (min-width: 640px) {
-    
-  }
+@media (min-width: 1024px) {
+}
 
-  @media (min-width: 1024px) {
-    
-  }
-
-  @media (min-width: 1280px) {
-    
-  }
+@media (min-width: 1280px) {
+}
 
 /* Page Transition Animations */
 .page-transition {
@@ -1663,7 +1530,8 @@
 }
 
 @keyframes wiggle {
-  0%, 7% {
+  0%,
+  7% {
     transform: rotateZ(0);
   }
   15% {
@@ -1681,7 +1549,8 @@
   35% {
     transform: rotateZ(-4deg);
   }
-  40%, 100% {
+  40%,
+  100% {
     transform: rotateZ(0);
   }
 }
@@ -1726,10 +1595,15 @@
 }
 
 @keyframes fabBounce {
-  0%, 20%, 53%, 80%, 100% {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translate3d(0, 0, 0);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translate3d(0, -8px, 0);
   }
   70% {
@@ -1782,16 +1656,13 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .shimmer {
     animation: none;
     background: hsl(var(--muted));
   }
-  
-  
-  
-  
-}eft {
+}
+eft {
   from {
     opacity: 0;
     transform: translateX(-20px);
@@ -1970,9 +1841,7 @@
 
 /* Indian currency formatting */
 
-
 /* Enhanced number formatting */
-
 
 /* Smooth transitions for interactive elements */
 .transition-smooth {
@@ -2030,15 +1899,7 @@
   transition-duration: var(--duration-150);
 }
 
-
-
-.dark 
-
-
-
-.dark 
-
-.modern-card-error:hover {
+.dark .dark .modern-card-error:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.15),
     0 10px 15px rgba(239, 68, 68, 0.08);
@@ -2217,8 +2078,6 @@
     --border: var(--gray-800);
     --ring: var(--primary-blue-700);
   }
-
-  
 }
 
 /* Print Styles */
@@ -2229,8 +2088,6 @@
     box-shadow: none !important;
     text-shadow: none !important;
   }
-
-  
 }
 /* Fi
 nancial Data Card Enhancements */
@@ -2368,8 +2225,6 @@ nancial Data Card Enhancements */
   border-top: 1px solid hsl(var(--border));
 }
 
-
-
 .legend-item:hover {
   background: hsl(var(--muted));
   transform: translateY(-1px);
@@ -2390,8 +2245,6 @@ nancial Data Card Enhancements */
   margin-top: 1.5rem;
   space-y: 0.75rem;
 }
-
-
 
 .asset-item:hover {
   transform: translateX(4px);
@@ -2451,8 +2304,12 @@ nancial Data Card Enhancements */
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Enhanced Chart Tooltips */
@@ -2562,7 +2419,6 @@ nancial Data Card Enhancements */
 }
 /* Enhanced Financial Data Presentation */
 
-
 .performance-indicator::before {
   content: "";
   position: absolute;
@@ -2584,7 +2440,6 @@ nancial Data Card Enhancements */
 }
 
 /* Animated Number Counter */
-
 
 .animated-number
 
@@ -2631,8 +2486,6 @@ nancial Data Card Enhancements */
     transform: translateX(400%);
   }
 }
-
-
 
 .progress-fill
 
@@ -2691,9 +2544,6 @@ nancial Data Card Enhancements */
 }
 
 /* Value Change Animations */
-
-
-
 
 @keyframes valueIncrease {
   0% {
@@ -2800,7 +2650,8 @@ eyframe Animations */
 }
 
 @keyframes fabPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
   }
@@ -2811,7 +2662,11 @@ eyframe Animations */
 }
 
 @keyframes fabBounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {

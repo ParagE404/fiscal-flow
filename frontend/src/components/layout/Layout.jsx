@@ -42,18 +42,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-background smooth-scroll flex overflow-x-hidden">
-      {/* Skip to main content link */}
-      {/* <a 
-        href="#main-content" 
-        className="skip-link sr-only-focusable"
-        onClick={(e) => {
-          e.preventDefault()
-          document.getElementById('main-content')?.focus()
-        }}
-      >
-        Skip to main content
-      </a> */}
-      
+
       {/* Sidebar Navigation */}
       <nav 
         role="navigation" 
