@@ -151,6 +151,25 @@ const createFixedDeposit = async (req, res, next) => {
       userId: req.user.id
     }
 
+    // Check for duplicate custom ID if provided
+    if (fdData.customId) {
+      const existingFD = await prisma.fixedDeposit.findFirst({
+        where: {
+          userId: req.user.id,
+          customId: fdData.customId
+        }
+      })
+
+      if (existingFD) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation Error',
+          message: 'A fixed deposit with this custom ID already exists',
+          timestamp: new Date().toISOString()
+        })
+      }
+    }
+
     // Calculate current value based on type and elapsed time
     fdData.currentValue = calculateFDCurrentValue(fdData)
 
@@ -192,6 +211,26 @@ const updateFixedDeposit = async (req, res, next) => {
         message: 'Fixed deposit not found',
         timestamp: new Date().toISOString()
       })
+    }
+
+    // Check for duplicate custom ID if being updated
+    if (updateData.customId && updateData.customId !== existingFD.customId) {
+      const duplicateFD = await prisma.fixedDeposit.findFirst({
+        where: {
+          userId: req.user.id,
+          customId: updateData.customId,
+          id: { not: id } // Exclude current FD
+        }
+      })
+
+      if (duplicateFD) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation Error',
+          message: 'A fixed deposit with this custom ID already exists',
+          timestamp: new Date().toISOString()
+        })
+      }
     }
 
     // Recalculate tenure if dates are updated

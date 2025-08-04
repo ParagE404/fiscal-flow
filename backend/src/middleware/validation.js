@@ -78,6 +78,7 @@ const mutualFundSchemas = {
 const fixedDepositSchemas = {
   create: z.object({
     bankName: z.string().min(1, 'Bank name is required').max(50),
+    customId: z.string().max(50, 'Custom ID too long').optional().or(z.literal('')),
     interestRate: z.number().positive().max(20, 'Interest rate seems too high'),
     type: z.enum(['Simple', 'Cumulative']),
     payoutType: z.enum(['Monthly', 'Quarterly', 'Half-yearly', 'Yearly', 'Maturity']).default('Maturity'),
@@ -93,6 +94,7 @@ const fixedDepositSchemas = {
 
   update: z.object({
     bankName: z.string().min(1).max(50).optional(),
+    customId: z.string().max(50, 'Custom ID too long').optional().or(z.literal('')),
     interestRate: z.number().positive().max(20).optional(),
     type: z.enum(['Simple', 'Cumulative']).optional(),
     payoutType: z.enum(['Monthly', 'Quarterly', 'Half-yearly', 'Yearly', 'Maturity']).optional(),

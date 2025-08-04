@@ -22,6 +22,7 @@ export const FDCard = ({
 
   const {
     bankName,
+    customId,
     investedAmount,
     currentValue,
     maturityAmount,
@@ -85,7 +86,7 @@ export const FDCard = ({
   return (
     <FinancialDataCard
       assetType="fixed-deposit"
-      title={bankName}
+      title={customId ? `${bankName} (${customId})` : bankName}
       subtitle={`${type} Interest • ${formatPercentage(interestRate)} p.a. • ${payoutType} Payout`}
       primaryValue={currentValue}
       secondaryValue={maturityAmount}
@@ -98,6 +99,16 @@ export const FDCard = ({
       onDelete={() => onDelete(fixedDeposit)}
       animateNumbers={true}
     >
+      {/* Custom ID Display */}
+      {customId && (
+        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-blue-700">FD Reference:</span>
+            <span className="text-sm font-mono font-semibold text-blue-800">{customId}</span>
+          </div>
+        </div>
+      )}
+
       {/* Investment Details */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div>

@@ -59,6 +59,7 @@ model FixedDeposit {
   id             String   @id @default(cuid())
   userId         String
   bankName       String
+  customId       String?  // Optional custom identification (FD number, receipt number, etc.)
   interestRate   Float
   type           String
   payoutType     String   @default("Maturity") // Monthly, Quarterly, Half-yearly, Yearly, Maturity
@@ -75,6 +76,7 @@ model FixedDeposit {
   
   @@index([userId])
   @@index([maturityDate])
+  @@index([customId])
   @@map("fixed_deposits")
 }
 

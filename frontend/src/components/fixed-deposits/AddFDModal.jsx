@@ -60,6 +60,7 @@ const PAYOUT_TYPES = [
 export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) => {
   const [formData, setFormData] = useState({
     bankName: '',
+    customId: '',
     investedAmount: '',
     interestRate: '',
     type: '',
@@ -77,6 +78,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
       if (editingFD) {
         setFormData({
           bankName: editingFD.bankName || '',
+          customId: editingFD.customId || '',
           investedAmount: editingFD.investedAmount?.toString() || '',
           interestRate: editingFD.interestRate?.toString() || '',
           type: editingFD.type || '',
@@ -88,6 +90,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
       } else {
         setFormData({
           bankName: '',
+          customId: '',
           investedAmount: '',
           interestRate: '',
           type: '',
@@ -198,6 +201,17 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
       newErrors.payoutType = 'Interest payout type is required'
     }
 
+    // Custom ID validation (optional but if provided, should be valid)
+    if (formData.customId && formData.customId.trim()) {
+      if (formData.customId.trim().length > 50) {
+        newErrors.customId = 'Custom ID must be 50 characters or less'
+      }
+      // Check for special characters that might cause issues
+      if (!/^[a-zA-Z0-9\-_\/\s]+$/.test(formData.customId.trim())) {
+        newErrors.customId = 'Custom ID can only contain letters, numbers, hyphens, underscores, slashes, and spaces'
+      }
+    }
+
     if (!formData.startDate) {
       newErrors.startDate = 'Start date is required'
     }
@@ -240,6 +254,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
       
       const fdData = {
         bankName: formData.bankName.trim(),
+        customId: formData.customId.trim() || null,
         investedAmount: parseFloat(formData.investedAmount),
         interestRate: parseFloat(formData.interestRate),
         type: formData.type,
@@ -298,23 +313,52 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="bankName">Bank Name *</Label>
-            <EnhancedSelect
-              options={BANKS.filter(bank => bank !== 'Other')}
-              value={formData.bankName}
-              onValueChange={(value) => handleInputChange('bankName', value)}
-              placeholder="Select or type bank name..."
-              allowCustom={true}
-              customPlaceholder="Enter bank name..."
-              className={errors.bankName ? 'border-destructive' : ''}
-            />
-            {errors.bankName && (
-              <p className="text-sm text-destructive">{errors.bankName}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Select from popular banks or add your own custom bank name
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="bankName">Bank Name *</Label>
+              <EnhancedSelect
+                options={BANKS.filter(bank => bank !== 'Other')}
+                value={formData.bankName}
+                onValueChange={(value) => handleInputChange('bankName', value)}
+                placeholder="Select or type bank name..."
+                allowCustom={true}
+                customPlaceholder="Enter bank name..."
+                className={errors.bankName ? 'border-destructive' : ''}
+              />
+              {errors.bankName && (
+                <p className="text-sm text-destructive">{errors.bankName}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Select from popular banks or add your own custom bank name
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="customId">
+                FD Number / Reference ID
+                <span className="text-xs text-muted-foreground ml-1">(Optional)</span>
+              </Label>
+              <Input
+                id="customId"
+                type="text"
+                placeholder="e.g., FD123456, RCP789, MY-FD-001"
+                maxLength={50}
+                value={formData.customId}
+                onChange={(e) => handleInputChange('customId', e.target.value)}
+                className={errors.customId ? 'border-destructive' : ''}
+              />
+              {errors.customId && (
+                <p className="text-sm text-destructive">{errors.customId}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Bank FD number, receipt ID, or your own reference code
+              </p>
+              {formData.customId && (
+                <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  Preview: {formData.customId}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
