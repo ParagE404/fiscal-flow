@@ -27,6 +27,7 @@ export const FDCard = ({
     maturityAmount,
     interestRate,
     type,
+    payoutType = 'Maturity',
     startDate,
     maturityDate,
     daysRemaining,
@@ -85,7 +86,7 @@ export const FDCard = ({
     <FinancialDataCard
       assetType="fixed-deposit"
       title={bankName}
-      subtitle={`${type} Interest • ${formatPercentage(interestRate)} p.a.`}
+      subtitle={`${type} Interest • ${formatPercentage(interestRate)} p.a. • ${payoutType} Payout`}
       primaryValue={currentValue}
       secondaryValue={maturityAmount}
       change={changePercentage}
@@ -106,10 +107,17 @@ export const FDCard = ({
           </p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Interest Earned</p>
+          <p className="text-sm text-muted-foreground">
+            {payoutType === 'Maturity' ? 'Interest Earned' : 'Interest (Periodic)'}
+          </p>
           <p className={`text-financial font-semibold ${getValueColor(interestEarned)}`}>
             {formatCurrency(interestEarned)}
           </p>
+          {payoutType !== 'Maturity' && (
+            <p className="text-xs text-muted-foreground">
+              Paid {payoutType.toLowerCase()}
+            </p>
+          )}
         </div>
       </div>
 

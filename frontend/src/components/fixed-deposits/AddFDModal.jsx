@@ -49,12 +49,21 @@ const FD_TYPES = [
   'Cumulative'
 ]
 
+const PAYOUT_TYPES = [
+  'Monthly',
+  'Quarterly', 
+  'Half-yearly',
+  'Yearly',
+  'Maturity'
+]
+
 export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) => {
   const [formData, setFormData] = useState({
     bankName: '',
     investedAmount: '',
     interestRate: '',
     type: '',
+    payoutType: 'Maturity',
     startDate: '',
     maturityDate: '',
     tenure: ''
@@ -71,6 +80,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
           investedAmount: editingFD.investedAmount?.toString() || '',
           interestRate: editingFD.interestRate?.toString() || '',
           type: editingFD.type || '',
+          payoutType: editingFD.payoutType || 'Maturity',
           startDate: editingFD.startDate ? new Date(editingFD.startDate).toISOString().split('T')[0] : '',
           maturityDate: editingFD.maturityDate ? new Date(editingFD.maturityDate).toISOString().split('T')[0] : '',
           tenure: editingFD.tenure?.toString() || ''
@@ -81,6 +91,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
           investedAmount: '',
           interestRate: '',
           type: '',
+          payoutType: 'Maturity',
           startDate: '',
           maturityDate: '',
           tenure: ''
@@ -120,17 +131,34 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
     const principal = parseFloat(formData.investedAmount)
     const rate = parseFloat(formData.interestRate)
     const tenureMonths = parseInt(formData.tenure)
+    const payoutType = formData.payoutType || 'Maturity'
     
     if (principal && rate && tenureMonths) {
       const years = tenureMonths / 12
       
       if (formData.type === 'Simple') {
         // Simple Interest: A = P + (P * R * T / 100)
-        const interest = (principal * rate * years) / 100
-        return principal + interest
+        const totalInterest = (principal * rate * years) / 100
+        
+        // For periodic payouts, only principal is returned at maturity
+        if (payoutType !== 'Maturity') {
+          return principal // Interest is paid periodically
+        }
+        
+        return principal + totalInterest
       } else if (formData.type === 'Cumulative') {
-        // Compound Interest (quarterly compounding): A = P(1 + R/400)^(4*T)
-        const amount = principal * Math.pow(1 + rate / 400, 4 * years)
+        // Compound Interest with different compounding frequencies
+        let compoundingFrequency = 4 // Default quarterly
+        
+        switch (payoutType) {
+          case 'Monthly': compoundingFrequency = 12; break
+          case 'Quarterly': compoundingFrequency = 4; break
+          case 'Half-yearly': compoundingFrequency = 2; break
+          case 'Yearly': compoundingFrequency = 1; break
+          case 'Maturity': compoundingFrequency = 4; break
+        }
+        
+        const amount = principal * Math.pow(1 + rate / (100 * compoundingFrequency), compoundingFrequency * years)
         return amount
       }
     }
@@ -164,6 +192,10 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
 
     if (!formData.type) {
       newErrors.type = 'FD type is required'
+    }
+
+    if (!formData.payoutType) {
+      newErrors.payoutType = 'Interest payout type is required'
     }
 
     if (!formData.startDate) {
@@ -211,6 +243,7 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
         investedAmount: parseFloat(formData.investedAmount),
         interestRate: parseFloat(formData.interestRate),
         type: formData.type,
+        payoutType: formData.payoutType,
         startDate: new Date(formData.startDate).toISOString(),
         maturityDate: new Date(formData.maturityDate).toISOString(),
         tenure: parseInt(formData.tenure),
@@ -321,21 +354,43 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="type">FD Type *</Label>
-            <EnhancedSelect
-              options={FD_TYPES.map(type => `${type} Interest`)}
-              value={formData.type ? `${formData.type} Interest` : ''}
-              onValueChange={(value) => handleInputChange('type', value.replace(' Interest', ''))}
-              placeholder="Select FD type..."
-              className={errors.type ? 'border-destructive' : ''}
-            />
-            {errors.type && (
-              <p className="text-sm text-destructive">{errors.type}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Simple: Interest paid periodically. Cumulative: Interest compounded quarterly.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="type">FD Type *</Label>
+              <EnhancedSelect
+                options={FD_TYPES.map(type => `${type} Interest`)}
+                value={formData.type ? `${formData.type} Interest` : ''}
+                onValueChange={(value) => handleInputChange('type', value.replace(' Interest', ''))}
+                placeholder="Select FD type..."
+                className={errors.type ? 'border-destructive' : ''}
+              />
+              {errors.type && (
+                <p className="text-sm text-destructive">{errors.type}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Simple: Interest paid periodically. Cumulative: Interest compounded.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="payoutType">Interest Payout *</Label>
+              <EnhancedSelect
+                options={PAYOUT_TYPES}
+                value={formData.payoutType}
+                onValueChange={(value) => handleInputChange('payoutType', value)}
+                placeholder="Select payout frequency..."
+                className={errors.payoutType ? 'border-destructive' : ''}
+              />
+              {errors.payoutType && (
+                <p className="text-sm text-destructive">{errors.payoutType}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {formData.payoutType === 'Maturity' 
+                  ? 'Interest paid at maturity' 
+                  : `Interest paid ${formData.payoutType.toLowerCase()}`
+                }
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -395,20 +450,37 @@ export const AddFDModal = observer(({ open, onOpenChange, editingFD, onClose }) 
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-green-800">
-                  Expected Maturity Amount:
+                  {formData.payoutType === 'Maturity' ? 'Expected Maturity Amount:' : 'Principal at Maturity:'}
                 </span>
                 <span className="text-lg font-bold text-green-900 font-mono">
                   ₹{maturityAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </span>
               </div>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-green-700">
-                  Interest Earned:
-                </span>
-                <span className="text-sm font-semibold text-green-800 font-mono">
-                  ₹{(maturityAmount - parseFloat(formData.investedAmount || 0)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                </span>
-              </div>
+              
+              {formData.payoutType === 'Maturity' ? (
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-green-700">
+                    Total Interest Earned:
+                  </span>
+                  <span className="text-sm font-semibold text-green-800 font-mono">
+                    ₹{(maturityAmount - parseFloat(formData.investedAmount || 0)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-1 mt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-green-700">
+                      Total Interest (paid {formData.payoutType.toLowerCase()}):
+                    </span>
+                    <span className="text-sm font-semibold text-green-800 font-mono">
+                      ₹{((parseFloat(formData.investedAmount || 0) * parseFloat(formData.interestRate || 0) * parseInt(formData.tenure || 0)) / (12 * 100)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                  <div className="text-xs text-green-600 mt-1">
+                    💡 Interest will be paid {formData.payoutType.toLowerCase()}, principal returned at maturity
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

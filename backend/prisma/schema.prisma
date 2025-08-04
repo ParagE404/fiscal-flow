@@ -61,6 +61,7 @@ model FixedDeposit {
   bankName       String
   interestRate   Float
   type           String
+  payoutType     String   @default("Maturity") // Monthly, Quarterly, Half-yearly, Yearly, Maturity
   investedAmount Float
   currentValue   Float
   maturityAmount Float
