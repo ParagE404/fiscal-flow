@@ -78,6 +78,11 @@ This implementation provides accurate current value calculation for mutual funds
 
 ### 4. Display in UI
 
+- **Summary Cards**: Show comprehensive portfolio metrics with breakdowns
+  - Total Invested (with lump sum + SIP breakdown)
+  - Current Value (total portfolio value)
+  - Total Returns (with percentage and color coding)
+  - Average CAGR (across all funds)
 - **Mutual Fund List**: Shows total current value with lump sum + SIP breakdown
 - **SIP List**: Shows individual SIP current values and returns
 - **Add/Edit Modal**: Shows investment summary preview
@@ -103,21 +108,34 @@ This implementation provides accurate current value calculation for mutual funds
 - `frontend/src/components/mutual-funds/SIPsList.jsx`: Added investment value column with current value display
 - `frontend/src/components/mutual-funds/AddSIPModal.jsx`: Added investment summary preview
 - `frontend/src/components/mutual-funds/MutualFundsList.jsx`: Updated to show total current value breakdown
+- `frontend/src/pages/MutualFunds.jsx`: Updated summary cards to show comprehensive values with breakdown
 - `frontend/src/stores/PortfolioStore.js`: Updated computed values to use comprehensive mutual fund data
+- `frontend/src/lib/apiClient.js`: Updated to return both funds and summary data
 
 ## Testing
 
-Run the comprehensive test script to verify all calculations:
+Run the comprehensive test scripts to verify all calculations:
+
+### Backend Calculations
 
 ```bash
 cd backend
 node test-sip-calculation.js
 ```
 
-The test verifies:
+### Frontend Summary Cards
+
+```bash
+cd frontend
+node test-summary-cards.js
+```
+
+The tests verify:
 
 - ✅ Growth rate calculation from lump sum performance
 - ✅ SIP current value calculation using growth rate
+- ✅ Summary cards display comprehensive values
+- ✅ Proper breakdown of lump sum vs SIP investments
 - ✅ Total current value combining lump sum + SIP
 - ✅ Individual SIP returns and percentages
 - ✅ Overall portfolio value calculations

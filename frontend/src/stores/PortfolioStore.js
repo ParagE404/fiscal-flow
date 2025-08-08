@@ -4,6 +4,7 @@ import { apiClient } from '../lib/apiClient'
 class PortfolioStore {
   // Observable state
   mutualFunds = []
+  mutualFundsSummary = {}
   sips = []
   fixedDeposits = []
   epfAccounts = []
@@ -35,7 +36,9 @@ class PortfolioStore {
 
   // Computed values
   get totalPortfolioValue() {
-    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0
+    // Use summary data if available, otherwise calculate from individual funds
+    const mfValue = this.mutualFundsSummary.totalCurrentValue || 
+      (Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0)
     const fdValue = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.currentValue || 0), 0) : 0
     const epfValue = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.totalBalance || 0), 0) : 0
     const stockValue = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.currentValue || 0), 0) : 0
@@ -44,7 +47,9 @@ class PortfolioStore {
   }
 
   get totalInvested() {
-    const mfInvested = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalInvestment || fund.investedAmount || 0), 0) : 0
+    // Use summary data if available, otherwise calculate from individual funds
+    const mfInvested = this.mutualFundsSummary.totalInvestment || 
+      (Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalInvestment || fund.investedAmount || 0), 0) : 0)
     const fdInvested = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.investedAmount || 0), 0) : 0
     const epfInvested = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.employeeContribution || 0), 0) : 0
     const stockInvested = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.investedAmount || 0), 0) : 0
@@ -82,7 +87,8 @@ class PortfolioStore {
       }
     }
 
-    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0
+    const mfValue = this.mutualFundsSummary.totalCurrentValue || 
+      (Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0)
     const stockValue = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.currentValue || 0), 0) : 0
     const fdValue = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.currentValue || 0), 0) : 0
     const epfValue = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.totalBalance || 0), 0) : 0
@@ -203,12 +209,20 @@ class PortfolioStore {
     try {
       const data = await apiClient.getMutualFunds()
       runInAction(() => {
-        this.mutualFunds = Array.isArray(data) ? data : []
+        // Handle both old array format and new object format for backward compatibility
+        if (Array.isArray(data)) {
+          this.mutualFunds = data
+          this.mutualFundsSummary = {}
+        } else {
+          this.mutualFunds = Array.isArray(data.funds) ? data.funds : []
+          this.mutualFundsSummary = data.summary || {}
+        }
       })
     } catch (error) {
       this.setError('mutualFunds', error.message)
       runInAction(() => {
         this.mutualFunds = []
+        this.mutualFundsSummary = {}
       })
     } finally {
       this.setLoading('mutualFunds', false)

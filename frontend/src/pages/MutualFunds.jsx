@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Plus, Download } from 'lucide-react'
 import { portfolioStore } from '@/stores/PortfolioStore'
-import { formatCurrency, formatPercentage } from '@/lib/utils'
+import { formatCurrency, formatPercentage, getValueColor } from '@/lib/utils'
 import { MutualFundsList } from '@/components/mutual-funds/MutualFundsList'
 import { SIPsList } from '@/components/mutual-funds/SIPsList'
 import { AddFundModal } from '@/components/mutual-funds/AddFundModal'
@@ -24,12 +24,25 @@ export const MutualFunds = observer(() => {
     portfolioStore.fetchSIPs()
   }, [])
 
-  // Calculate summary data
-  const totalInvested = portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.investedAmount || 0), 0)
-  const totalCurrentValue = portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.currentValue || 0), 0)
-  const avgCAGR = portfolioStore.mutualFunds.length > 0 
-    ? portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.cagr || 0), 0) / portfolioStore.mutualFunds.length 
-    : 0
+  // Get summary data from store (includes comprehensive calculations)
+  const summary = portfolioStore.mutualFundsSummary
+  
+  // Use summary data if available, otherwise calculate from individual funds (fallback)
+  const totalInvested = summary.totalInvestment || 
+    portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.totalInvestment || fund.investedAmount || 0), 0)
+  const totalCurrentValue = summary.totalCurrentValue || 
+    portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0)
+  const totalReturns = summary.totalReturns || (totalCurrentValue - totalInvested)
+  const totalReturnsPercentage = summary.totalReturnsPercentage || 
+    (totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0)
+  const avgCAGR = summary.avgCAGR || 
+    (portfolioStore.mutualFunds.length > 0 
+      ? portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.cagr || 0), 0) / portfolioStore.mutualFunds.length 
+      : 0)
+  const totalLumpSumInvested = summary.totalLumpSumInvested || 
+    portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.investedAmount || 0), 0)
+  const totalSIPInvestment = summary.totalSIPInvestment || 
+    portfolioStore.mutualFunds.reduce((sum, fund) => sum + (fund.sipInvestment || 0), 0)
 
   const [isExporting, setIsExporting] = useState(false)
 
@@ -80,7 +93,7 @@ export const MutualFunds = observer(() => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -89,6 +102,12 @@ export const MutualFunds = observer(() => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalInvested)}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Lump Sum: {formatCurrency(totalLumpSumInvested)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              SIP: {formatCurrency(totalSIPInvestment)}
+            </div>
           </CardContent>
         </Card>
         
@@ -100,17 +119,41 @@ export const MutualFunds = observer(() => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalCurrentValue)}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Total portfolio value
+            </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              CAGR Returns
+              Total Returns
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPercentage(avgCAGR)}</div>
+            <div className={`text-2xl font-bold ${getValueColor(totalReturns)}`}>
+              {totalReturns >= 0 ? '+' : ''}{formatCurrency(totalReturns)}
+            </div>
+            <div className={`text-xs mt-1 ${getValueColor(totalReturns)}`}>
+              {formatPercentage(totalReturnsPercentage)} overall
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Average CAGR
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${getValueColor(avgCAGR)}`}>
+              {formatPercentage(avgCAGR)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Across all funds
+            </div>
           </CardContent>
         </Card>
       </div>
