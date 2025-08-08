@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { portfolioStore } from '@/stores/PortfolioStore'
+import { formatCurrency } from '@/lib/utils'
 
 const FREQUENCIES = [
   'Monthly',
@@ -415,6 +416,33 @@ export const AddSIPModal = observer(({ open, onOpenChange, editingSIP, onClose }
               <p className="text-sm text-destructive">{errors.status}</p>
             )}
           </div>
+
+          {/* Investment Summary */}
+          {formData.amount && formData.completedInstallments && (
+            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+              <h4 className="font-medium text-sm">Investment Summary</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Total Invested:</span>
+                  <div className="font-medium">
+                    {formatCurrency((parseFloat(formData.amount) || 0) * (parseInt(formData.completedInstallments) || 0))}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Remaining Investment:</span>
+                  <div className="font-medium">
+                    {formatCurrency((parseFloat(formData.amount) || 0) * 
+                      Math.max(0, (parseInt(formData.totalInstallments) || 0) - (parseInt(formData.completedInstallments) || 0)))}
+                  </div>
+                </div>
+              </div>
+              {formData.mutualFundId && (
+                <div className="text-xs text-muted-foreground">
+                  Current value will be calculated based on linked mutual fund performance
+                </div>
+              )}
+            </div>
+          )}
 
           {errors.submit && (
             <p className="text-sm text-destructive">{errors.submit}</p>

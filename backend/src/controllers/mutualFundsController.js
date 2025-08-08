@@ -7,6 +7,60 @@ const prisma = new PrismaClient()
 // Authentication is now implemented - use req.user.id
 
 /**
+ * Calculate comprehensive mutual fund current value including both lump sum and SIP investments
+ * @param {string} mutualFundId - Mutual fund ID
+ * @returns {Object} Comprehensive mutual fund value calculations
+ */
+const calculateMutualFundTotalCurrentValue = async (mutualFundId) => {
+  try {
+    // Get mutual fund data with SIPs
+    const mutualFund = await prisma.mutualFund.findUnique({
+      where: { id: mutualFundId },
+      include: {
+        sips: true
+      }
+    })
+
+    if (!mutualFund) {
+      return null
+    }
+
+    // Calculate total SIP investment
+    const totalSIPInvestment = mutualFund.sips.reduce((total, sip) => {
+      return total + (sip.completedInstallments * sip.amount)
+    }, 0)
+
+    // Calculate growth rate from lump sum performance
+    let growthRate = 1 // Default to no growth
+    if (mutualFund.investedAmount > 0) {
+      growthRate = mutualFund.currentValue / mutualFund.investedAmount
+    }
+
+    // Apply same growth rate to SIP investments
+    const sipCurrentValue = totalSIPInvestment * growthRate
+
+    // Calculate total current value
+    const totalCurrentValue = mutualFund.currentValue + sipCurrentValue
+    const totalInvestment = mutualFund.investedAmount + totalSIPInvestment
+
+    return {
+      lumpSumInvested: mutualFund.investedAmount,
+      lumpSumCurrentValue: mutualFund.currentValue,
+      sipInvestment: totalSIPInvestment,
+      sipCurrentValue,
+      totalInvestment,
+      totalCurrentValue,
+      growthRate,
+      totalReturns: totalCurrentValue - totalInvestment,
+      totalReturnsPercentage: totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0
+    }
+  } catch (error) {
+    console.error('Error calculating mutual fund total current value:', error)
+    return null
+  }
+}
+
+/**
  * Get all mutual funds with summary calculations
  */
 const getAllMutualFunds = async (req, res, next) => {
@@ -29,30 +83,49 @@ const getAllMutualFunds = async (req, res, next) => {
       orderBy: { createdAt: 'desc' }
     })
 
-    // Calculate summary
-    const totalInvested = mutualFunds.reduce((sum, fund) => sum + fund.investedAmount, 0)
-    const totalSIPInvestment = mutualFunds.reduce((sum, fund) => sum + fund.sipInvestment, 0)
-    const totalCurrentValue = mutualFunds.reduce((sum, fund) => sum + fund.currentValue, 0)
+    // Calculate comprehensive values for each fund
+    const fundsWithTotalValues = await Promise.all(
+      mutualFunds.map(async (fund) => {
+        const calculations = await calculateMutualFundTotalCurrentValue(fund.id)
+        return {
+          ...fund,
+          // Add calculated fields
+          totalCurrentValue: calculations?.totalCurrentValue || fund.currentValue,
+          totalInvestment: calculations?.totalInvestment || fund.investedAmount,
+          totalReturns: calculations?.totalReturns || 0,
+          totalReturnsPercentage: calculations?.totalReturnsPercentage || 0,
+          sipCurrentValue: calculations?.sipCurrentValue || 0,
+          growthRate: calculations?.growthRate || 1
+        }
+      })
+    )
+
+    // Calculate summary using total values
+    const totalLumpSumInvested = fundsWithTotalValues.reduce((sum, fund) => sum + fund.investedAmount, 0)
+    const totalSIPInvestment = fundsWithTotalValues.reduce((sum, fund) => sum + fund.sipInvestment, 0)
+    const totalCurrentValue = fundsWithTotalValues.reduce((sum, fund) => sum + fund.totalCurrentValue, 0)
+    const totalInvestment = totalLumpSumInvested + totalSIPInvestment
     
     // Calculate overall CAGR (simplified - assumes all investments started at the same time)
-    const avgCAGR = mutualFunds.length > 0 
-      ? mutualFunds.reduce((sum, fund) => sum + fund.cagr, 0) / mutualFunds.length 
+    const avgCAGR = fundsWithTotalValues.length > 0 
+      ? fundsWithTotalValues.reduce((sum, fund) => sum + fund.cagr, 0) / fundsWithTotalValues.length 
       : 0
 
     const summary = {
-      totalInvested,
+      totalLumpSumInvested,
       totalSIPInvestment,
-      totalInvestment: totalInvested + totalSIPInvestment,
+      totalInvestment,
       totalCurrentValue,
-      totalReturns: totalCurrentValue - (totalInvested + totalSIPInvestment),
+      totalReturns: totalCurrentValue - totalInvestment,
+      totalReturnsPercentage: totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0,
       avgCAGR,
-      totalFunds: mutualFunds.length
+      totalFunds: fundsWithTotalValues.length
     }
 
     res.json({
       success: true,
       data: {
-        funds: mutualFunds,
+        funds: fundsWithTotalValues,
         summary
       },
       timestamp: new Date().toISOString()

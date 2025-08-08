@@ -44,7 +44,10 @@ const getAllSIPs = async (req, res, next) => {
             name: true,
             category: true,
             riskLevel: true,
-            rating: true
+            rating: true,
+            investedAmount: true,
+            currentValue: true,
+            totalInvestment: true
           }
         }
       },
@@ -55,6 +58,12 @@ const getAllSIPs = async (req, res, next) => {
     const activeSIPs = sips.filter(sip => sip.status === 'Active')
     const totalSIPAmount = activeSIPs.reduce((sum, sip) => sum + sip.amount, 0)
     const totalInvested = sips.reduce((sum, sip) => sum + (sip.completedInstallments * sip.amount), 0)
+    
+    // Calculate total current value of all SIPs
+    const totalCurrentValue = sips.reduce((sum, sip) => {
+      const sipValueCalculations = calculateSIPCurrentValue(sip, sip.mutualFund)
+      return sum + sipValueCalculations.currentValue
+    }, 0)
     
     // Calculate upcoming SIPs (next 30 days)
     const thirtyDaysFromNow = new Date()
@@ -69,6 +78,9 @@ const getAllSIPs = async (req, res, next) => {
       activeSIPs: activeSIPs.length,
       totalSIPAmount,
       totalInvested,
+      totalCurrentValue,
+      totalReturns: totalCurrentValue - totalInvested,
+      totalReturnsPercentage: totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0,
       upcomingSIPs
     }
 
@@ -77,17 +89,23 @@ const getAllSIPs = async (req, res, next) => {
       const nextDueDate = new Date(sip.nextDueDate)
       const now = new Date()
       const daysUntilDue = Math.ceil((nextDueDate - now) / (1000 * 60 * 60 * 24))
-      const totalInvestedInSIP = sip.completedInstallments * sip.amount
       const remainingInstallments = sip.totalInstallments - sip.completedInstallments
       const remainingAmount = remainingInstallments * sip.amount
+      
+      // Calculate SIP current value based on linked mutual fund
+      const sipValueCalculations = calculateSIPCurrentValue(sip, sip.mutualFund)
       
       return {
         ...sip,
         daysUntilDue,
-        totalInvestedInSIP,
         remainingInstallments,
         remainingAmount,
-        progressPercentage: (sip.completedInstallments / sip.totalInstallments) * 100
+        progressPercentage: (sip.completedInstallments / sip.totalInstallments) * 100,
+        // Add SIP value calculations
+        totalInvestedInSIP: sipValueCalculations.investedAmount,
+        currentValueOfSIP: sipValueCalculations.currentValue,
+        sipReturns: sipValueCalculations.returns,
+        sipReturnsPercentage: sipValueCalculations.returnsPercentage
       }
     })
 
@@ -115,6 +133,19 @@ const getSIPById = async (req, res, next) => {
       where: { 
         id,
         userId: req.user.id 
+      },
+      include: {
+        mutualFund: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            riskLevel: true,
+            rating: true,
+            currentValue: true,
+            totalInvestment: true
+          }
+        }
       }
     })
 
@@ -131,17 +162,23 @@ const getSIPById = async (req, res, next) => {
     const nextDueDate = new Date(sip.nextDueDate)
     const now = new Date()
     const daysUntilDue = Math.ceil((nextDueDate - now) / (1000 * 60 * 60 * 24))
-    const totalInvestedInSIP = sip.completedInstallments * sip.amount
     const remainingInstallments = sip.totalInstallments - sip.completedInstallments
     const remainingAmount = remainingInstallments * sip.amount
+    
+    // Calculate SIP current value based on linked mutual fund
+    const sipValueCalculations = calculateSIPCurrentValue(sip, sip.mutualFund)
 
     const sipWithCalculations = {
       ...sip,
       daysUntilDue,
-      totalInvestedInSIP,
       remainingInstallments,
       remainingAmount,
-      progressPercentage: (sip.completedInstallments / sip.totalInstallments) * 100
+      progressPercentage: (sip.completedInstallments / sip.totalInstallments) * 100,
+      // Add SIP value calculations
+      totalInvestedInSIP: sipValueCalculations.investedAmount,
+      currentValueOfSIP: sipValueCalculations.currentValue,
+      sipReturns: sipValueCalculations.returns,
+      sipReturnsPercentage: sipValueCalculations.returnsPercentage
     }
 
     res.json({
@@ -455,32 +492,107 @@ const deleteSIP = async (req, res, next) => {
 }
 
 /**
- * Update mutual fund's SIP investment amount based on linked SIPs
+ * Calculate comprehensive mutual fund current value including both lump sum and SIP investments
+ * @param {string} mutualFundId - Mutual fund ID
+ * @param {number} lumpSumCurrentValue - Current value of lump sum investment (from user input)
+ * @returns {Object} Comprehensive mutual fund value calculations
  */
-const updateMutualFundSIPInvestment = async (mutualFundId) => {
+const calculateMutualFundTotalCurrentValue = async (mutualFundId, lumpSumCurrentValue = null) => {
   try {
-    // Calculate total SIP investment for this mutual fund
-    const sips = await prisma.sIP.findMany({
-      where: { mutualFundId }
+    // Get mutual fund data
+    const mutualFund = await prisma.mutualFund.findUnique({
+      where: { id: mutualFundId },
+      include: {
+        sips: true
+      }
     })
 
-    const sipInvestment = sips.reduce((total, sip) => {
+    if (!mutualFund) {
+      return null
+    }
+
+    // Calculate total SIP investment
+    const totalSIPInvestment = mutualFund.sips.reduce((total, sip) => {
       return total + (sip.completedInstallments * sip.amount)
     }, 0)
 
-    // Get current mutual fund data
-    const mutualFund = await prisma.mutualFund.findUnique({
-      where: { id: mutualFundId }
-    })
+    // Use provided lump sum current value or existing one
+    const lumpSumCurrent = lumpSumCurrentValue !== null ? lumpSumCurrentValue : mutualFund.currentValue
+    
+    // Calculate growth rate from lump sum performance
+    let growthRate = 1 // Default to no growth
+    if (mutualFund.investedAmount > 0) {
+      growthRate = lumpSumCurrent / mutualFund.investedAmount
+    }
 
-    if (mutualFund) {
-      const totalInvestment = mutualFund.investedAmount + sipInvestment
+    // Apply same growth rate to SIP investments
+    const sipCurrentValue = totalSIPInvestment * growthRate
 
+    // Calculate total current value
+    const totalCurrentValue = lumpSumCurrent + sipCurrentValue
+    const totalInvestment = mutualFund.investedAmount + totalSIPInvestment
+
+    return {
+      lumpSumInvested: mutualFund.investedAmount,
+      lumpSumCurrentValue: lumpSumCurrent,
+      sipInvestment: totalSIPInvestment,
+      sipCurrentValue,
+      totalInvestment,
+      totalCurrentValue,
+      growthRate,
+      totalReturns: totalCurrentValue - totalInvestment,
+      totalReturnsPercentage: totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0
+    }
+  } catch (error) {
+    console.error('Error calculating mutual fund total current value:', error)
+    return null
+  }
+}
+
+/**
+ * Calculate SIP current value based on linked mutual fund performance
+ * @param {Object} sip - SIP object
+ * @param {Object} mutualFund - Linked mutual fund object (optional)
+ * @returns {Object} SIP value calculations
+ */
+const calculateSIPCurrentValue = (sip, mutualFund = null) => {
+  const investedAmount = sip.completedInstallments * sip.amount
+  let currentValue = investedAmount // Default to invested amount
+  let returns = 0
+  let returnsPercentage = 0
+
+  if (mutualFund && mutualFund.investedAmount > 0) {
+    // Calculate growth rate from lump sum performance (this represents the fund's overall performance)
+    const fundGrowthRate = mutualFund.currentValue / mutualFund.investedAmount
+    currentValue = investedAmount * fundGrowthRate
+    returns = currentValue - investedAmount
+    returnsPercentage = investedAmount > 0 ? (returns / investedAmount) * 100 : 0
+  }
+
+  return {
+    investedAmount,
+    currentValue: Math.max(currentValue, 0), // Ensure non-negative
+    returns,
+    returnsPercentage
+  }
+}
+
+/**
+ * Update mutual fund's SIP investment amount and recalculate total current value
+ */
+const updateMutualFundSIPInvestment = async (mutualFundId) => {
+  try {
+    // Get comprehensive mutual fund calculations
+    const calculations = await calculateMutualFundTotalCurrentValue(mutualFundId)
+    
+    if (calculations) {
       await prisma.mutualFund.update({
         where: { id: mutualFundId },
         data: {
-          sipInvestment,
-          totalInvestment
+          sipInvestment: calculations.sipInvestment,
+          totalInvestment: calculations.totalInvestment
+          // Note: We don't update currentValue here as it represents lump sum current value
+          // The total current value is calculated dynamically when needed
         }
       })
     }

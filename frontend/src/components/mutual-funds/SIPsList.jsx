@@ -229,7 +229,8 @@ export const SIPsList = observer(() => {
             <TableHeader>
               <TableRow>
                 <SortableHeader field="fundName">Fund Name</SortableHeader>
-                <SortableHeader field="amount">Amount</SortableHeader>
+                <SortableHeader field="amount">SIP Amount</SortableHeader>
+                <SortableHeader field="totalInvestedInSIP">Investment Value</SortableHeader>
                 <SortableHeader field="frequency">Frequency</SortableHeader>
                 <SortableHeader field="nextDueDate">
                   Next Due Date
@@ -260,7 +261,28 @@ export const SIPsList = observer(() => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{formatCurrency(sip.amount || 0)}</TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="font-medium">{formatCurrency(sip.amount || 0)}</div>
+                        <div className="text-xs text-muted-foreground">per installment</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="font-medium">
+                          {formatCurrency(sip.currentValueOfSIP || sip.totalInvestedInSIP || 0)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Invested: {formatCurrency(sip.totalInvestedInSIP || 0)}
+                        </div>
+                        {sip.sipReturns !== undefined && sip.sipReturns !== 0 && (
+                          <div className={`text-xs ${sip.sipReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {sip.sipReturns >= 0 ? '+' : ''}{formatCurrency(sip.sipReturns)} 
+                            ({sip.sipReturnsPercentage?.toFixed(2)}%)
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{sip.frequency}</Badge>
                     </TableCell>

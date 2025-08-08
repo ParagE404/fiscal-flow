@@ -35,7 +35,7 @@ class PortfolioStore {
 
   // Computed values
   get totalPortfolioValue() {
-    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.currentValue || 0), 0) : 0
+    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0
     const fdValue = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.currentValue || 0), 0) : 0
     const epfValue = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.totalBalance || 0), 0) : 0
     const stockValue = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.currentValue || 0), 0) : 0
@@ -44,7 +44,7 @@ class PortfolioStore {
   }
 
   get totalInvested() {
-    const mfInvested = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.investedAmount || 0), 0) : 0
+    const mfInvested = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalInvestment || fund.investedAmount || 0), 0) : 0
     const fdInvested = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.investedAmount || 0), 0) : 0
     const epfInvested = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.employeeContribution || 0), 0) : 0
     const stockInvested = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.investedAmount || 0), 0) : 0
@@ -82,7 +82,7 @@ class PortfolioStore {
       }
     }
 
-    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.currentValue || 0), 0) : 0
+    const mfValue = Array.isArray(this.mutualFunds) ? this.mutualFunds.reduce((sum, fund) => sum + (fund.totalCurrentValue || fund.currentValue || 0), 0) : 0
     const stockValue = Array.isArray(this.stocks) ? this.stocks.reduce((sum, stock) => sum + (stock.currentValue || 0), 0) : 0
     const fdValue = Array.isArray(this.fixedDeposits) ? this.fixedDeposits.reduce((sum, fd) => sum + (fd.currentValue || 0), 0) : 0
     const epfValue = Array.isArray(this.epfAccounts) ? this.epfAccounts.reduce((sum, epf) => sum + (epf.totalBalance || 0), 0) : 0
@@ -113,9 +113,11 @@ class PortfolioStore {
     // Add mutual funds
     if (Array.isArray(this.mutualFunds)) {
       this.mutualFunds.forEach(fund => {
-        const returns = (fund.currentValue || 0) - (fund.investedAmount || 0)
-        const returnsPercentage = fund.investedAmount > 0 
-          ? (returns / fund.investedAmount) * 100 
+        const totalCurrentValue = fund.totalCurrentValue || fund.currentValue || 0
+        const totalInvestment = fund.totalInvestment || fund.investedAmount || 0
+        const returns = totalCurrentValue - totalInvestment
+        const returnsPercentage = totalInvestment > 0 
+          ? (returns / totalInvestment) * 100 
           : 0
         
         performers.push({

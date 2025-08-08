@@ -194,7 +194,7 @@ export const MutualFundsList = observer(() => {
                 <SortableHeader field="rating">Rating</SortableHeader>
                 <SortableHeader field="investedAmount">Lump Sum</SortableHeader>
                 <SortableHeader field="sipInvestment">SIP Investment</SortableHeader>
-                <SortableHeader field="currentValue">Current Value</SortableHeader>
+                <SortableHeader field="totalCurrentValue">Total Current Value</SortableHeader>
                 <SortableHeader field="cagr">CAGR</SortableHeader>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -202,7 +202,8 @@ export const MutualFundsList = observer(() => {
             <ResponsiveTableBody>
               {sortedFunds.map((fund) => {
                 const totalInvestment = (fund.investedAmount || 0) + (fund.sipInvestment || 0)
-                const returns = (fund.currentValue || 0) - totalInvestment
+                const totalCurrentValue = fund.totalCurrentValue || fund.currentValue || 0
+                const returns = totalCurrentValue - totalInvestment
                 const returnsPercentage = totalInvestment > 0 
                   ? (returns / totalInvestment) * 100 
                   : 0
@@ -235,7 +236,15 @@ export const MutualFundsList = observer(() => {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div>{formatCurrency(fund.currentValue || 0)}</div>
+                        <div className="font-medium">{formatCurrency(totalCurrentValue)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Lump Sum: {formatCurrency(fund.currentValue || 0)}
+                        </div>
+                        {fund.sipCurrentValue > 0 && (
+                          <div className="text-xs text-muted-foreground">
+                            SIP: {formatCurrency(fund.sipCurrentValue)}
+                          </div>
+                        )}
                         <div className={`text-sm ${getValueColor(returns)}`}>
                           {returns >= 0 ? '+' : ''}{formatCurrency(returns)} ({formatPercentage(returnsPercentage)})
                         </div>
@@ -273,9 +282,11 @@ export const MutualFundsList = observer(() => {
           {/* Mobile card view */}
           <div className="sm:hidden space-y-4 p-4">
             {sortedFunds.map((fund) => {
-              const returns = (fund.currentValue || 0) - (fund.investedAmount || 0)
-              const returnsPercentage = fund.investedAmount > 0 
-                ? (returns / fund.investedAmount) * 100 
+              const totalInvestment = (fund.investedAmount || 0) + (fund.sipInvestment || 0)
+              const totalCurrentValue = fund.totalCurrentValue || fund.currentValue || 0
+              const returns = totalCurrentValue - totalInvestment
+              const returnsPercentage = totalInvestment > 0 
+                ? (returns / totalInvestment) * 100 
                 : 0
 
               return (
@@ -321,12 +332,20 @@ export const MutualFundsList = observer(() => {
                     {/* Financial details */}
                     <div className="space-y-1">
                       <MobileField 
-                        label="Invested" 
+                        label="Total Invested" 
+                        value={formatCurrency(totalInvestment)} 
+                      />
+                      <MobileField 
+                        label="Lump Sum" 
                         value={formatCurrency(fund.investedAmount || 0)} 
                       />
                       <MobileField 
-                        label="Current Value" 
-                        value={formatCurrency(fund.currentValue || 0)} 
+                        label="SIP Investment" 
+                        value={formatCurrency(fund.sipInvestment || 0)} 
+                      />
+                      <MobileField 
+                        label="Total Current Value" 
+                        value={formatCurrency(totalCurrentValue)} 
                       />
                       <MobileField 
                         label="Returns" 
