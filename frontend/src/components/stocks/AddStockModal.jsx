@@ -20,27 +20,7 @@ import {
 } from '@/components/ui/select'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { toast } from 'sonner'
-
-const SECTORS = [
-  'Banking',
-  'IT Services',
-  'Energy',
-  'Pharmaceuticals',
-  'Automobiles',
-  'FMCG',
-  'Metals',
-  'Telecommunications',
-  'Real Estate',
-  'Infrastructure',
-  'Chemicals',
-  'Textiles',
-  'Media & Entertainment',
-  'Healthcare',
-  'Consumer Durables',
-  'Capital Goods',
-  'Utilities',
-  'Other'
-]
+import { INDIAN_SECTORS, MARKET_CAP_CATEGORIES, INDIAN_EXCHANGES, validateStockSymbol } from '@/lib/indianMarketContext'
 
 const MARKET_CAPS = [
   'Large Cap',
@@ -48,11 +28,17 @@ const MARKET_CAPS = [
   'Small Cap'
 ]
 
+const EXCHANGES = [
+  { value: 'NSE', label: 'NSE (National Stock Exchange)' },
+  { value: 'BSE', label: 'BSE (Bombay Stock Exchange)' }
+]
+
 const AddStockModal = observer(({ open, onClose, editStock = null }) => {
   const [formData, setFormData] = useState({
     symbol: '',
     companyName: '',
     sector: '',
+    exchange: 'NSE',
     marketCap: '',
     quantity: '',
     buyPrice: '',
@@ -69,6 +55,7 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         symbol: editStock.symbol || '',
         companyName: editStock.companyName || '',
         sector: editStock.sector || '',
+        exchange: editStock.exchange || 'NSE',
         marketCap: editStock.marketCap || '',
         quantity: editStock.quantity?.toString() || '',
         buyPrice: editStock.buyPrice?.toString() || '',
@@ -79,6 +66,7 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         symbol: '',
         companyName: '',
         sector: '',
+        exchange: 'NSE',
         marketCap: '',
         quantity: '',
         buyPrice: '',
@@ -102,8 +90,8 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
     // Required field validations
     if (!formData.symbol.trim()) {
       newErrors.symbol = 'Stock symbol is required'
-    } else if (!/^[A-Z0-9]+$/.test(formData.symbol.trim())) {
-      newErrors.symbol = 'Symbol should contain only uppercase letters and numbers'
+    } else if (!validateStockSymbol(formData.symbol.trim())) {
+      newErrors.symbol = 'Invalid stock symbol format. Should contain only letters and numbers (1-20 characters)'
     }
 
     if (!formData.companyName.trim()) {
@@ -155,6 +143,7 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         symbol: formData.symbol.trim().toUpperCase(),
         companyName: formData.companyName.trim(),
         sector: formData.sector,
+        exchange: formData.exchange,
         marketCap: formData.marketCap,
         quantity: parseInt(formData.quantity),
         buyPrice: parseFloat(formData.buyPrice),
@@ -237,7 +226,7 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             {/* Sector */}
             <div className="space-y-2">
               <Label htmlFor="sector">
@@ -250,8 +239,8 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
                 <SelectTrigger className={errors.sector ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select sector" />
                 </SelectTrigger>
-                <SelectContent>
-                  {SECTORS.map((sector) => (
+                <SelectContent className="max-h-60">
+                  {INDIAN_SECTORS.map((sector) => (
                     <SelectItem key={sector} value={sector}>
                       {sector}
                     </SelectItem>
@@ -263,29 +252,60 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
               )}
             </div>
 
-            {/* Market Cap */}
-            <div className="space-y-2">
-              <Label htmlFor="marketCap">
-                Market Cap <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.marketCap}
-                onValueChange={(value) => handleInputChange('marketCap', value)}
-              >
-                <SelectTrigger className={errors.marketCap ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select market cap" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MARKET_CAPS.map((cap) => (
-                    <SelectItem key={cap} value={cap}>
-                      {cap}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.marketCap && (
-                <p className="text-sm text-red-500">{errors.marketCap}</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Exchange */}
+              <div className="space-y-2">
+                <Label htmlFor="exchange">
+                  Exchange <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.exchange}
+                  onValueChange={(value) => handleInputChange('exchange', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select exchange" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXCHANGES.map((exchange) => (
+                      <SelectItem key={exchange.value} value={exchange.value}>
+                        {exchange.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Market Cap */}
+              <div className="space-y-2">
+                <Label htmlFor="marketCap">
+                  Market Cap <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.marketCap}
+                  onValueChange={(value) => handleInputChange('marketCap', value)}
+                >
+                  <SelectTrigger className={errors.marketCap ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select market cap" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MARKET_CAPS.map((cap) => (
+                      <SelectItem key={cap} value={cap}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{cap}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {cap === 'Large Cap' && '(Top 100)'}
+                            {cap === 'Mid Cap' && '(101-250)'}
+                            {cap === 'Small Cap' && '(251+)'}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.marketCap && (
+                  <p className="text-sm text-red-500">{errors.marketCap}</p>
+                )}
+              </div>
             </div>
           </div>
 

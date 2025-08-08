@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar, Building2, Hash, DollarSign } from 'lucide-react'
+import { Calendar, Building2, Hash, DollarSign, CreditCard } from 'lucide-react'
+import { validatePFNumber, validateUAN, EPF_CONSTANTS } from '@/lib/indianMarketContext'
 
 export const AddEPFModal = ({ 
   isOpen, 
@@ -23,12 +24,14 @@ export const AddEPFModal = ({
   const [formData, setFormData] = useState({
     employerName: '',
     pfNumber: '',
+    uan: '',
     status: 'Active',
     totalBalance: '',
     employeeContribution: '',
     employerContribution: '',
     pensionFund: '',
     monthlyContribution: '',
+    contributionRate: '12',
     startDate: '',
     endDate: ''
   })
@@ -42,12 +45,14 @@ export const AddEPFModal = ({
         setFormData({
           employerName: editingEPF.employerName || '',
           pfNumber: editingEPF.pfNumber || '',
+          uan: editingEPF.uan || '',
           status: editingEPF.status || 'Active',
           totalBalance: editingEPF.totalBalance?.toString() || '',
           employeeContribution: editingEPF.employeeContribution?.toString() || '',
           employerContribution: editingEPF.employerContribution?.toString() || '',
           pensionFund: editingEPF.pensionFund?.toString() || '',
           monthlyContribution: editingEPF.monthlyContribution?.toString() || '',
+          contributionRate: editingEPF.contributionRate?.toString() || '12',
           startDate: editingEPF.startDate ? new Date(editingEPF.startDate).toISOString().split('T')[0] : '',
           endDate: editingEPF.endDate ? new Date(editingEPF.endDate).toISOString().split('T')[0] : ''
         })
@@ -55,12 +60,14 @@ export const AddEPFModal = ({
         setFormData({
           employerName: '',
           pfNumber: '',
+          uan: '',
           status: 'Active',
           totalBalance: '',
           employeeContribution: '',
           employerContribution: '',
           pensionFund: '',
           monthlyContribution: '',
+          contributionRate: '12',
           startDate: '',
           endDate: ''
         })
@@ -94,6 +101,13 @@ export const AddEPFModal = ({
 
     if (!formData.pfNumber.trim()) {
       newErrors.pfNumber = 'PF number is required'
+    } else if (!validatePFNumber(formData.pfNumber.trim())) {
+      newErrors.pfNumber = 'Invalid PF number format. Expected format: XX/XXX/0000000/000/0000000'
+    }
+
+    // UAN validation (optional but if provided should be valid)
+    if (formData.uan && formData.uan.trim() && !validateUAN(formData.uan.trim())) {
+      newErrors.uan = 'UAN must be a 12-digit number'
     }
 
     if (!formData.startDate) {
@@ -146,13 +160,15 @@ export const AddEPFModal = ({
 
     const submitData = {
       employerName: formData.employerName.trim(),
-      pfNumber: formData.pfNumber.trim(),
+      pfNumber: formData.pfNumber.trim().toUpperCase(),
+      uan: formData.uan ? formData.uan.trim() : null,
       status: formData.status,
       totalBalance: parseFloat(formData.totalBalance),
       employeeContribution: parseFloat(formData.employeeContribution),
       employerContribution: parseFloat(formData.employerContribution),
       pensionFund: parseFloat(formData.pensionFund),
       monthlyContribution: parseFloat(formData.monthlyContribution),
+      contributionRate: parseFloat(formData.contributionRate),
       startDate: new Date(formData.startDate).toISOString(),
       endDate: formData.endDate && formData.status === 'Transferred' 
         ? new Date(formData.endDate).toISOString() 
@@ -171,12 +187,14 @@ export const AddEPFModal = ({
     setFormData({
       employerName: '',
       pfNumber: '',
+      uan: '',
       status: 'Active',
       totalBalance: '',
       employeeContribution: '',
       employerContribution: '',
       pensionFund: '',
       monthlyContribution: '',
+      contributionRate: '12',
       startDate: '',
       endDate: ''
     })
@@ -202,7 +220,7 @@ export const AddEPFModal = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Basic Information */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="employerName">Employer Name *</Label>
               <Input
@@ -217,21 +235,47 @@ export const AddEPFModal = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="pfNumber">PF Number *</Label>
-              <div className="relative">
-                <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="pfNumber"
-                  placeholder="e.g., KN/12345/67890"
-                  value={formData.pfNumber}
-                  onChange={(e) => handleInputChange('pfNumber', e.target.value)}
-                  className={`pl-10 ${errors.pfNumber ? 'border-destructive' : ''}`}
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pfNumber">PF Number *</Label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="pfNumber"
+                    placeholder="e.g., KN/BNG/1234567/000/1234567"
+                    value={formData.pfNumber}
+                    onChange={(e) => handleInputChange('pfNumber', e.target.value.toUpperCase())}
+                    className={`pl-10 ${errors.pfNumber ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.pfNumber && (
+                  <p className="text-sm text-destructive">{errors.pfNumber}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Format: XX/XXX/0000000/000/0000000
+                </p>
               </div>
-              {errors.pfNumber && (
-                <p className="text-sm text-destructive">{errors.pfNumber}</p>
-              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="uan">UAN (Universal Account Number)</Label>
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="uan"
+                    placeholder="e.g., 123456789012"
+                    maxLength="12"
+                    value={formData.uan}
+                    onChange={(e) => handleInputChange('uan', e.target.value.replace(/\D/g, ''))}
+                    className={`pl-10 ${errors.uan ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.uan && (
+                  <p className="text-sm text-destructive">{errors.uan}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  12-digit number (optional)
+                </p>
+              </div>
             </div>
           </div>
 
@@ -247,8 +291,30 @@ export const AddEPFModal = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Transferred">Transferred</SelectItem>
+                  <SelectItem value="Active">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Active
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Transferred">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      Transferred
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Settled">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                      Settled
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Inoperative">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      Inoperative
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -295,7 +361,7 @@ export const AddEPFModal = ({
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-foreground">Financial Details</h4>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="totalBalance">Total Balance *</Label>
                 <div className="relative">
@@ -334,6 +400,23 @@ export const AddEPFModal = ({
                 {errors.monthlyContribution && (
                   <p className="text-sm text-destructive">{errors.monthlyContribution}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contributionRate">Contribution Rate (%)</Label>
+                <Input
+                  id="contributionRate"
+                  type="number"
+                  step="0.1"
+                  min="8"
+                  max="15"
+                  placeholder="12"
+                  value={formData.contributionRate}
+                  onChange={(e) => handleInputChange('contributionRate', e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Standard rate: {EPF_CONSTANTS.EMPLOYEE_CONTRIBUTION_RATE}%
+                </p>
               </div>
             </div>
 

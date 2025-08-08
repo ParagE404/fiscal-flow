@@ -30,8 +30,17 @@ class PortfolioStore {
     stocks: null,
   }
 
+  // Synchronization state
+  lastSyncTimestamp = null
+  syncInProgress = false
+  autoRefreshInterval = null
+  dataVersion = 0
+
   constructor() {
     makeAutoObservable(this)
+    
+    // Set up automatic data refresh every 5 minutes
+    this.setupAutoRefresh()
   }
 
   // Computed values
@@ -219,30 +228,75 @@ class PortfolioStore {
         }
       })
     } catch (error) {
-      this.setError('mutualFunds', error.message)
+      this.setError('mutualFunds', this.getErrorMessage(error))
       runInAction(() => {
         this.mutualFunds = []
         this.mutualFundsSummary = {}
       })
+      throw error
     } finally {
       this.setLoading('mutualFunds', false)
     }
   }
 
   async addMutualFund(fundData) {
+    // Optimistic update
+    const tempId = `temp-${Date.now()}`
+    const optimisticFund = {
+      id: tempId,
+      ...fundData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isOptimistic: true
+    }
+
+    runInAction(() => {
+      this.mutualFunds.push(optimisticFund)
+    })
+
     try {
       const newFund = await apiClient.createMutualFund(fundData)
       runInAction(() => {
-        this.mutualFunds.push(newFund)
+        // Replace optimistic update with real data
+        const index = this.mutualFunds.findIndex(fund => fund.id === tempId)
+        if (index !== -1) {
+          this.mutualFunds[index] = newFund
+        }
       })
+      
+      // Refresh data to ensure consistency
+      await this.fetchMutualFunds()
       return newFund
     } catch (error) {
-      this.setError('mutualFunds', error.message)
+      // Revert optimistic update
+      runInAction(() => {
+        this.mutualFunds = this.mutualFunds.filter(fund => fund.id !== tempId)
+      })
+      this.setError('mutualFunds', this.getErrorMessage(error))
       throw error
     }
   }
 
   async updateMutualFund(id, fundData) {
+    // Store original data for rollback
+    const originalFund = this.mutualFunds.find(fund => fund.id === id)
+    if (!originalFund) {
+      throw new Error('Fund not found')
+    }
+
+    // Optimistic update
+    runInAction(() => {
+      const index = this.mutualFunds.findIndex(fund => fund.id === id)
+      if (index !== -1) {
+        this.mutualFunds[index] = {
+          ...this.mutualFunds[index],
+          ...fundData,
+          updatedAt: new Date().toISOString(),
+          isOptimistic: true
+        }
+      }
+    })
+
     try {
       const updatedFund = await apiClient.updateMutualFund(id, fundData)
       runInAction(() => {
@@ -251,21 +305,47 @@ class PortfolioStore {
           this.mutualFunds[index] = updatedFund
         }
       })
+      
+      // Refresh data to ensure consistency
+      await this.fetchMutualFunds()
       return updatedFund
     } catch (error) {
-      this.setError('mutualFunds', error.message)
+      // Revert optimistic update
+      runInAction(() => {
+        const index = this.mutualFunds.findIndex(fund => fund.id === id)
+        if (index !== -1) {
+          this.mutualFunds[index] = originalFund
+        }
+      })
+      this.setError('mutualFunds', this.getErrorMessage(error))
       throw error
     }
   }
 
   async deleteMutualFund(id) {
+    // Store original data for rollback
+    const originalFund = this.mutualFunds.find(fund => fund.id === id)
+    if (!originalFund) {
+      throw new Error('Fund not found')
+    }
+
+    // Optimistic update
+    runInAction(() => {
+      this.mutualFunds = this.mutualFunds.filter(fund => fund.id !== id)
+    })
+
     try {
       await apiClient.deleteMutualFund(id)
-      runInAction(() => {
-        this.mutualFunds = this.mutualFunds.filter(fund => fund.id !== id)
-      })
+      // Refresh data to ensure consistency
+      await this.fetchMutualFunds()
     } catch (error) {
-      this.setError('mutualFunds', error.message)
+      // Revert optimistic update
+      runInAction(() => {
+        this.mutualFunds.push(originalFund)
+        // Re-sort to maintain order
+        this.mutualFunds.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      })
+      this.setError('mutualFunds', this.getErrorMessage(error))
       throw error
     }
   }
@@ -526,7 +606,7 @@ class PortfolioStore {
     }
   }
 
-  // Dashboard data fetching
+  // Dashboard data fetching with synchronization
   async fetchDashboardData() {
     this.setLoading('dashboard', true)
     this.setError('dashboard', null)
@@ -540,10 +620,294 @@ class PortfolioStore {
         this.fetchEPFAccounts(),
         this.fetchStocks(),
       ])
+      
+      // Update last sync timestamp
+      this.lastSyncTimestamp = new Date().toISOString()
+      
     } catch (error) {
-      this.setError('dashboard', error.message)
+      this.setError('dashboard', this.getErrorMessage(error))
+      throw error
     } finally {
       this.setLoading('dashboard', false)
+    }
+  }
+
+  // Data refresh and synchronization
+  async refreshAllData(force = false) {
+    // Prevent concurrent refresh operations
+    if (this.syncInProgress && !force) {
+      console.log('Sync already in progress, skipping...')
+      return
+    }
+
+    this.syncInProgress = true
+    this.setLoading('dashboard', true)
+    this.clearAllErrors()
+    
+    try {
+      // Check if we need to refresh based on last sync time
+      if (!force && this.shouldSkipRefresh()) {
+        console.log('Data is fresh, skipping refresh')
+        return
+      }
+
+      console.log('Refreshing all portfolio data...')
+      
+      // Fetch all data in parallel with timeout
+      const refreshPromises = [
+        this.fetchMutualFunds(),
+        this.fetchSIPs(),
+        this.fetchFixedDeposits(),
+        this.fetchEPFAccounts(),
+        this.fetchStocks(),
+      ]
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Data refresh timeout')), 30000)
+      })
+
+      await Promise.race([
+        Promise.all(refreshPromises),
+        timeoutPromise
+      ])
+
+      // Update sync metadata
+      runInAction(() => {
+        this.lastSyncTimestamp = new Date().toISOString()
+        this.dataVersion += 1
+      })
+
+      console.log('Portfolio data refresh completed successfully')
+      
+    } catch (error) {
+      this.setError('dashboard', this.getErrorMessage(error))
+      console.error('Portfolio data refresh failed:', error)
+      throw error
+    } finally {
+      this.syncInProgress = false
+      this.setLoading('dashboard', false)
+    }
+  }
+
+  // Smart refresh - only refresh if data is stale
+  shouldSkipRefresh() {
+    if (!this.lastSyncTimestamp) return false
+    
+    const lastSync = new Date(this.lastSyncTimestamp)
+    const now = new Date()
+    const timeDiff = now - lastSync
+    const fiveMinutes = 5 * 60 * 1000
+    
+    return timeDiff < fiveMinutes
+  }
+
+  // Selective data refresh for specific types
+  async refreshDataType(type) {
+    this.setLoading(type, true)
+    this.setError(type, null)
+    
+    try {
+      switch (type) {
+        case 'mutualFunds':
+          await this.fetchMutualFunds()
+          break
+        case 'sips':
+          await this.fetchSIPs()
+          break
+        case 'fixedDeposits':
+          await this.fetchFixedDeposits()
+          break
+        case 'epf':
+          await this.fetchEPFAccounts()
+          break
+        case 'stocks':
+          await this.fetchStocks()
+          break
+        default:
+          throw new Error(`Unknown data type: ${type}`)
+      }
+      
+      runInAction(() => {
+        this.dataVersion += 1
+      })
+      
+    } catch (error) {
+      this.setError(type, this.getErrorMessage(error))
+      throw error
+    } finally {
+      this.setLoading(type, false)
+    }
+  }
+
+  // Auto-refresh setup
+  setupAutoRefresh(intervalMinutes = 5) {
+    // Clear existing interval
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval)
+    }
+
+    // Set up new interval
+    this.autoRefreshInterval = setInterval(async () => {
+      try {
+        // Only auto-refresh if user is active and no manual operations in progress
+        if (this.isUserActive() && !this.hasActiveOperations()) {
+          await this.refreshAllData()
+        }
+      } catch (error) {
+        console.warn('Auto-refresh failed:', error.message)
+      }
+    }, intervalMinutes * 60 * 1000)
+  }
+
+  // Check if user is active (has interacted recently)
+  isUserActive() {
+    // Simple implementation - can be enhanced with actual user activity tracking
+    return document.visibilityState === 'visible'
+  }
+
+  // Check if there are any active operations that should prevent auto-refresh
+  hasActiveOperations() {
+    return Object.values(this.loading).some(loading => loading)
+  }
+
+  // Stop auto-refresh
+  stopAutoRefresh() {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval)
+      this.autoRefreshInterval = null
+    }
+  }
+
+  // Force refresh all data
+  async forceRefresh() {
+    return this.refreshAllData(true)
+  }
+
+  // Enhanced cache invalidation with consistency checks
+  invalidateCache(type = 'all', reason = 'manual') {
+    console.log(`Invalidating cache for ${type} (reason: ${reason})`)
+    
+    runInAction(() => {
+      if (type === 'all' || type === 'mutualFunds') {
+        this.mutualFunds = []
+        this.mutualFundsSummary = {}
+        this.clearError('mutualFunds')
+      }
+      if (type === 'all' || type === 'sips') {
+        this.sips = []
+        this.clearError('sips')
+      }
+      if (type === 'all' || type === 'fixedDeposits') {
+        this.fixedDeposits = []
+        this.clearError('fixedDeposits')
+      }
+      if (type === 'all' || type === 'epf') {
+        this.epfAccounts = []
+        this.clearError('epf')
+      }
+      if (type === 'all' || type === 'stocks') {
+        this.stocks = []
+        this.clearError('stocks')
+      }
+      
+      // Reset sync metadata if invalidating all
+      if (type === 'all') {
+        this.lastSyncTimestamp = null
+        this.dataVersion = 0
+      }
+    })
+  }
+
+  // Data consistency validation
+  validateDataConsistency() {
+    const issues = []
+
+    // Check for duplicate IDs
+    const allIds = [
+      ...this.mutualFunds.map(f => f.id),
+      ...this.sips.map(s => s.id),
+      ...this.fixedDeposits.map(fd => fd.id),
+      ...this.epfAccounts.map(epf => epf.id),
+      ...this.stocks.map(stock => stock.id)
+    ]
+
+    const duplicateIds = allIds.filter((id, index) => allIds.indexOf(id) !== index)
+    if (duplicateIds.length > 0) {
+      issues.push(`Duplicate IDs found: ${duplicateIds.join(', ')}`)
+    }
+
+    // Check for invalid data structures
+    this.mutualFunds.forEach((fund, index) => {
+      if (!fund.id || !fund.name) {
+        issues.push(`Invalid mutual fund at index ${index}: missing required fields`)
+      }
+      if (fund.investedAmount < 0 || fund.currentValue < 0) {
+        issues.push(`Invalid mutual fund ${fund.name}: negative amounts`)
+      }
+    })
+
+    this.stocks.forEach((stock, index) => {
+      if (!stock.id || !stock.symbol) {
+        issues.push(`Invalid stock at index ${index}: missing required fields`)
+      }
+      if (stock.quantity <= 0 || stock.buyPrice <= 0) {
+        issues.push(`Invalid stock ${stock.symbol}: invalid quantity or price`)
+      }
+    })
+
+    // Check for orphaned optimistic updates
+    const optimisticItems = [
+      ...this.mutualFunds.filter(f => f.isOptimistic),
+      ...this.sips.filter(s => s.isOptimistic),
+      ...this.fixedDeposits.filter(fd => fd.isOptimistic),
+      ...this.epfAccounts.filter(epf => epf.isOptimistic),
+      ...this.stocks.filter(stock => stock.isOptimistic)
+    ]
+
+    if (optimisticItems.length > 0) {
+      issues.push(`Found ${optimisticItems.length} orphaned optimistic updates`)
+    }
+
+    if (issues.length > 0) {
+      console.warn('Data consistency issues found:', issues)
+      return { valid: false, issues }
+    }
+
+    return { valid: true, issues: [] }
+  }
+
+  // Clean up orphaned optimistic updates
+  cleanupOptimisticUpdates() {
+    runInAction(() => {
+      this.mutualFunds = this.mutualFunds.filter(f => !f.isOptimistic)
+      this.sips = this.sips.filter(s => !s.isOptimistic)
+      this.fixedDeposits = this.fixedDeposits.filter(fd => !fd.isOptimistic)
+      this.epfAccounts = this.epfAccounts.filter(epf => !epf.isOptimistic)
+      this.stocks = this.stocks.filter(stock => !stock.isOptimistic)
+    })
+  }
+
+  // Sync status information
+  getSyncStatus() {
+    return {
+      lastSync: this.lastSyncTimestamp,
+      syncInProgress: this.syncInProgress,
+      dataVersion: this.dataVersion,
+      hasErrors: Object.values(this.error).some(error => error !== null),
+      isLoading: Object.values(this.loading).some(loading => loading),
+      autoRefreshEnabled: this.autoRefreshInterval !== null
+    }
+  }
+
+  // Connection health check
+  async checkConnection() {
+    try {
+      const isHealthy = await apiClient.healthCheck()
+      return isHealthy
+    } catch (error) {
+      console.error('Connection check failed:', error)
+      return false
     }
   }
 
@@ -564,6 +928,29 @@ class PortfolioStore {
     Object.keys(this.error).forEach(key => {
       this.error[key] = null
     })
+  }
+
+  getErrorMessage(error) {
+    if (typeof error === 'string') return error
+    if (error?.message) return error.message
+    if (error?.response?.data?.message) return error.response.data.message
+    return 'An unexpected error occurred'
+  }
+
+  // Optimistic update helpers
+  generateTempId() {
+    return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  }
+
+  createOptimisticItem(data, type) {
+    return {
+      id: this.generateTempId(),
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isOptimistic: true,
+      type
+    }
   }
 }
 

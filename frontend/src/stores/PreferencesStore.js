@@ -153,6 +153,7 @@ class PreferencesStore {
     const { currency, numberFormat } = this.preferences
     
     if (numberFormat.style === 'indian') {
+      // Use the enhanced utility function for consistent formatting
       return this.formatIndianCurrency(amount, currency.symbol, numberFormat.decimalPlaces)
     } else {
       return new Intl.NumberFormat('en-US', {
@@ -164,38 +165,34 @@ class PreferencesStore {
     }
   }
 
-  formatIndianCurrency(amount, symbol = '₹', decimalPlaces = 2) {
-    const numStr = amount.toFixed(decimalPlaces)
-    const [integerPart, decimalPart] = numStr.split('.')
+  formatIndianCurrency(amount, symbol = '₹', decimalPlaces = 0) {
+    if (amount === null || amount === undefined || isNaN(amount)) return symbol + '0'
     
-    // Indian number formatting (lakhs and crores)
-    let formattedInteger = ''
-    const len = integerPart.length
+    const formatter = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: decimalPlaces,
+      maximumFractionDigits: decimalPlaces
+    })
     
-    if (len <= 3) {
-      formattedInteger = integerPart
-    } else if (len <= 5) {
-      formattedInteger = integerPart.slice(0, len - 3) + ',' + integerPart.slice(len - 3)
-    } else if (len <= 7) {
-      formattedInteger = integerPart.slice(0, len - 5) + ',' + 
-                        integerPart.slice(len - 5, len - 3) + ',' + 
-                        integerPart.slice(len - 3)
+    return formatter.format(amount)
+  }
+
+  // Large number formatting with lakhs/crores
+  formatLargeNumber(amount, showSymbol = true) {
+    if (amount === null || amount === undefined || isNaN(amount)) return showSymbol ? '₹0' : '0'
+    
+    const symbol = showSymbol ? '₹' : ''
+    
+    if (amount >= 10000000) { // 1 crore
+      return `${symbol}${(amount / 10000000).toFixed(2)} Cr`
+    } else if (amount >= 100000) { // 1 lakh
+      return `${symbol}${(amount / 100000).toFixed(2)} L`
+    } else if (amount >= 1000) { // 1 thousand
+      return `${symbol}${(amount / 1000).toFixed(1)} K`
     } else {
-      // For very large numbers, use crore formatting
-      const crores = Math.floor(amount / 10000000)
-      const remainder = amount % 10000000
-      const lakhs = Math.floor(remainder / 100000)
-      const thousands = remainder % 100000
-      
-      let parts = []
-      if (crores > 0) parts.push(crores + ' Cr')
-      if (lakhs > 0) parts.push(lakhs + ' L')
-      if (thousands > 0) parts.push(this.formatIndianCurrency(thousands, '', decimalPlaces).replace(symbol, ''))
-      
-      return symbol + parts.join(' ')
+      return this.formatIndianCurrency(amount, symbol)
     }
-    
-    return symbol + formattedInteger + (decimalPart ? '.' + decimalPart : '')
   }
 
   // Number formatting
@@ -203,7 +200,11 @@ class PreferencesStore {
     const { numberFormat } = this.preferences
     
     if (numberFormat.style === 'indian') {
-      return this.formatIndianCurrency(number, '', numberFormat.decimalPlaces).replace('₹', '')
+      if (number === null || number === undefined || isNaN(number)) return '0'
+      return new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: numberFormat.decimalPlaces,
+        maximumFractionDigits: numberFormat.decimalPlaces
+      }).format(number)
     } else {
       return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: numberFormat.decimalPlaces,
@@ -214,7 +215,39 @@ class PreferencesStore {
 
   // Percentage formatting
   formatPercentage(value, decimalPlaces = 2) {
-    return (value >= 0 ? '+' : '') + value.toFixed(decimalPlaces) + '%'
+    if (value === null || value === undefined || isNaN(value)) return '0.00%'
+    const sign = value >= 0 ? '+' : ''
+    return `${sign}${value.toFixed(decimalPlaces)}%`
+  }
+
+  // Date formatting in Indian format (DD/MM/YYYY)
+  formatDate(date) {
+    if (!date) return ''
+    
+    const dateObj = new Date(date)
+    if (isNaN(dateObj.getTime())) return ''
+    
+    const day = dateObj.getDate().toString().padStart(2, '0')
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+    const year = dateObj.getFullYear()
+    
+    return `${day}/${month}/${year}`
+  }
+
+  // Display date formatting (e.g., "15 Jan 2024")
+  formatDisplayDate(date) {
+    if (!date) return ''
+    
+    const dateObj = new Date(date)
+    if (isNaN(dateObj.getTime())) return ''
+    
+    const options = { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    }
+    
+    return dateObj.toLocaleDateString('en-IN', options)
   }
 
   // Dashboard preferences
