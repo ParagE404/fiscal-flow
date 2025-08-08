@@ -1,9 +1,10 @@
 import React from 'react'
+import { describe, test, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { TopPerformers } from '../TopPerformers'
 
 // Mock the utils functions
-jest.mock('@/lib/utils', () => ({
+vi.mock('@/lib/utils', () => ({
   formatCurrency: (amount) => `₹${amount.toLocaleString('en-IN')}`,
   formatPercentage: (percentage, showSign) => {
     const sign = showSign && percentage > 0 ? '+' : ''

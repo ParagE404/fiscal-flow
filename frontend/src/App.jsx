@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { UserProvider } from './contexts/UserContext'
 import { initializeAccessibility } from './lib/accessibility'
 import { initializePerformanceOptimizations } from './lib/performance'
+import { initializePerformanceMonitoring } from './lib/performance/bundleOptimization.jsx'
 import { Layout } from './components/layout/Layout'
 import { ProtectedRoute, EmailVerifiedRoute, PublicOnlyRoute } from './components/auth/ProtectedRoute'
-import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
-import { Dashboard } from './pages/Dashboard'
-import { MutualFunds } from './pages/MutualFunds'
-import { FixedDeposits } from './pages/FixedDeposits'
-import { EPF } from './pages/EPF'
-import { Stocks } from './pages/Stocks'
-import { Settings } from './pages/Settings'
-import { Login } from './pages/Login'
-import { Register } from './pages/Register'
-import { EnhancedRegister } from './pages/EnhancedRegister'
-import { ForgotPassword } from './pages/ForgotPassword'
-import { VerifyEmail } from './pages/VerifyEmail'
-import { FormDemo } from './pages/FormDemo'
-import BrowserCompatibilityTest from './pages/BrowserCompatibilityTest'
-import StyleGuide from './components/design-system/StyleGuide'
-import LayoutTest from './pages/LayoutTest'
-import SidebarTest from './pages/SidebarTest'
+import { LoadingSpinner } from './components/ui/loading-spinner'
+
+// Lazy load components for better performance
+const OnboardingFlow = lazy(() => import('./components/onboarding/OnboardingFlow').then(module => ({ default: module.OnboardingFlow })))
+const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })))
+const MutualFunds = lazy(() => import('./pages/MutualFunds').then(module => ({ default: module.MutualFunds })))
+const FixedDeposits = lazy(() => import('./pages/FixedDeposits').then(module => ({ default: module.FixedDeposits })))
+const EPF = lazy(() => import('./pages/EPF').then(module => ({ default: module.EPF })))
+const Stocks = lazy(() => import('./pages/Stocks').then(module => ({ default: module.Stocks })))
+const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })))
+const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })))
+const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })))
+const EnhancedRegister = lazy(() => import('./pages/EnhancedRegister').then(module => ({ default: module.EnhancedRegister })))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })))
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail').then(module => ({ default: module.VerifyEmail })))
+const FormDemo = lazy(() => import('./pages/FormDemo').then(module => ({ default: module.FormDemo })))
+const BrowserCompatibilityTest = lazy(() => import('./pages/BrowserCompatibilityTest'))
+const StyleGuide = lazy(() => import('./components/design-system/StyleGuide'))
+const LayoutTest = lazy(() => import('./pages/LayoutTest'))
+const SidebarTest = lazy(() => import('./pages/SidebarTest'))
 
 function App() {
   const [showOnboarding, setShowOnboarding] = useState(true)
@@ -35,6 +39,7 @@ function App() {
   useEffect(() => {
     initializeAccessibility()
     initializePerformanceOptimizations()
+    initializePerformanceMonitoring()
   }, [])
 
   return (
@@ -44,34 +49,46 @@ function App() {
           {/* Public-only routes (redirect if authenticated) */}
           <Route path="/login" element={
             <PublicOnlyRoute>
-              <Login />
+              <Suspense fallback={<LoadingSpinner />}>
+                <Login />
+              </Suspense>
             </PublicOnlyRoute>
           } />
           <Route path="/register" element={
             <PublicOnlyRoute>
-              <Register />
+              <Suspense fallback={<LoadingSpinner />}>
+                <Register />
+              </Suspense>
             </PublicOnlyRoute>
           } />
           <Route path="/enhanced-register" element={
             <PublicOnlyRoute>
-              <EnhancedRegister />
+              <Suspense fallback={<LoadingSpinner />}>
+                <EnhancedRegister />
+              </Suspense>
             </PublicOnlyRoute>
           } />
           <Route path="/forgot-password" element={
             <PublicOnlyRoute>
-              <ForgotPassword />
+              <Suspense fallback={<LoadingSpinner />}>
+                <ForgotPassword />
+              </Suspense>
             </PublicOnlyRoute>
           } />
           
           {/* Email verification routes (accessible to authenticated users) */}
           <Route path="/verify-email/:token" element={
             <ProtectedRoute>
-              <VerifyEmail />
+              <Suspense fallback={<LoadingSpinner />}>
+                <VerifyEmail />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/verify-email/pending" element={
             <ProtectedRoute>
-              <VerifyEmail />
+              <Suspense fallback={<LoadingSpinner />}>
+                <VerifyEmail />
+              </Suspense>
             </ProtectedRoute>
           } />
           
@@ -81,22 +98,68 @@ function App() {
               <>
                 <Layout />
                 {showOnboarding && (
-                  <OnboardingFlow onComplete={handleOnboardingComplete} />
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <OnboardingFlow onComplete={handleOnboardingComplete} />
+                  </Suspense>
                 )}
               </>
             </EmailVerifiedRoute>
           }>
-            <Route index element={<Dashboard />} />
-            <Route path="mutual-funds" element={<MutualFunds />} />
-            <Route path="fixed-deposits" element={<FixedDeposits />} />
-            <Route path="epf" element={<EPF />} />
-            <Route path="stocks" element={<Stocks />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="form-demo" element={<FormDemo />} />
-            <Route path="browser-compatibility-test" element={<BrowserCompatibilityTest />} />
-            <Route path="style-guide" element={<StyleGuide />} />
-            <Route path="layout-test" element={<LayoutTest />} />
-            <Route path="sidebar-test" element={<SidebarTest />} />
+            <Route index element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Dashboard />
+              </Suspense>
+            } />
+            <Route path="mutual-funds" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <MutualFunds />
+              </Suspense>
+            } />
+            <Route path="fixed-deposits" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <FixedDeposits />
+              </Suspense>
+            } />
+            <Route path="epf" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <EPF />
+              </Suspense>
+            } />
+            <Route path="stocks" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Stocks />
+              </Suspense>
+            } />
+            <Route path="settings" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Settings />
+              </Suspense>
+            } />
+            <Route path="form-demo" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <FormDemo />
+              </Suspense>
+            } />
+            <Route path="browser-compatibility-test" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <BrowserCompatibilityTest />
+              </Suspense>
+            } />
+            <Route path="style-guide" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <StyleGuide />
+              </Suspense>
+            } />
+            <Route path="layout-test" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <LayoutTest />
+              </Suspense>
+            } />
+            <Route path="sidebar-test" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <SidebarTest />
+              </Suspense>
+            } />
           </Route>
         </Routes>
         <Toaster position="top-right" />

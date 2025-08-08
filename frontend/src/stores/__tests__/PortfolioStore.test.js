@@ -1,16 +1,17 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 import { PortfolioStore } from '../PortfolioStore'
 import { apiClient } from '../../lib/apiClient'
 
 // Mock the API client
-jest.mock('../../lib/apiClient')
+vi.mock('../../lib/apiClient')
 
-describe('PortfolioStore', () => {
+describe('ProtfolioStore', () => {
   let store
 
   beforeEach(() => {
     store = new PortfolioStore()
-    jest.clearAllMocks()
-    console.error = jest.fn()
+    vi.clearAllMocks()
+    console.error = vi.fn()
   })
 
   describe('Computed Values', () => {

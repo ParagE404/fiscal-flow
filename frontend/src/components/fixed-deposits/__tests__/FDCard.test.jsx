@@ -1,9 +1,10 @@
 import React from 'react'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { FDCard } from '../FDCard'
 
 // Mock the utils
-jest.mock('@/lib/utils', () => ({
+vi.mock('@/lib/utils', () => ({
   formatCurrency: (amount) => `₹${amount.toLocaleString('en-IN')}`,
   formatPercentage: (percentage) => `${percentage.toFixed(2)}%`,
   getValueColor: (value) => value > 0 ? 'text-success-600' : value < 0 ? 'text-destructive-600' : 'text-muted-foreground'
@@ -27,11 +28,11 @@ const mockFD = {
 }
 
 describe('FDCard', () => {
-  const mockOnEdit = jest.fn()
-  const mockOnDelete = jest.fn()
+  const mockOnEdit = vi.fn()
+  const mockOnDelete = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   test('renders FD card with correct information', () => {

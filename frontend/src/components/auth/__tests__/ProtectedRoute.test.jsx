@@ -1,4 +1,5 @@
 import React from 'react'
+import { describe, test, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ProtectedRoute } from '../ProtectedRoute'
@@ -13,8 +14,8 @@ const mockUserContext = {
   isInitializing: false,
 }
 
-jest.mock('../../../contexts/UserContext', () => ({
-  ...jest.requireActual('../../../contexts/UserContext'),
+vi.mock('../../../contexts/UserContext', () => ({
+  ...vi.importActual('../../../contexts/UserContext'),
   useUser: () => mockUserContext,
 }))
 

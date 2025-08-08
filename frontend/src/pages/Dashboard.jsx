@@ -1,9 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryCard } from "@/components/common/SummaryCard";
-import { AssetAllocationChart } from "@/components/dashboard/AssetAllocationChart";
-import { TopPerformers } from "@/components/dashboard/TopPerformers";
 import {
   FadeInAnimation,
   StaggeredAnimation,
@@ -13,8 +11,22 @@ import {
   LoadingOverlay,
   StaggeredLoadingCards,
 } from "@/components/common/LoadingState";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { usePortfolioStore } from "@/stores/StoreContext";
 import { formatPercentage } from "@/lib/utils";
+
+// Lazy load heavy components for better performance
+const AssetAllocationChart = lazy(() => 
+  import("@/components/dashboard/AssetAllocationChart").then(module => ({
+    default: module.AssetAllocationChart
+  }))
+);
+
+const TopPerformers = lazy(() => 
+  import("@/components/dashboard/TopPerformers").then(module => ({
+    default: module.TopPerformers
+  }))
+);
 
 export const Dashboard = observer(() => {
   const portfolioStore = usePortfolioStore();
@@ -99,10 +111,12 @@ export const Dashboard = observer(() => {
               </p>
             </CardHeader>
             <CardContent className="pt-0">
-              <AssetAllocationChart
-                assetAllocation={portfolioStore.assetAllocation}
-                loading={portfolioStore.loading.dashboard}
-              />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AssetAllocationChart
+                  assetAllocation={portfolioStore.assetAllocation}
+                  loading={portfolioStore.loading.dashboard}
+                />
+              </Suspense>
             </CardContent>
           </Card>
         </ScrollRevealAnimation>
@@ -119,10 +133,12 @@ export const Dashboard = observer(() => {
               </p>
             </CardHeader>
             <CardContent className="pt-0">
-              <TopPerformers
-                topPerformers={portfolioStore.topPerformers}
-                loading={portfolioStore.loading.dashboard}
-              />
+              <Suspense fallback={<LoadingSpinner />}>
+                <TopPerformers
+                  topPerformers={portfolioStore.topPerformers}
+                  loading={portfolioStore.loading.dashboard}
+                />
+              </Suspense>
             </CardContent>
           </Card>
         </ScrollRevealAnimation>

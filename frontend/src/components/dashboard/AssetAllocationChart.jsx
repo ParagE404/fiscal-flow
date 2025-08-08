@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo, useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Legend, PieChart, Pie, Tooltip } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
+import { memoizeWithTTL } from '@/lib/memoization.js'
 
 const ASSET_COLORS = {
   mutualFunds: '#2563eb', // Enhanced blue
@@ -30,9 +31,32 @@ const ASSET_ICONS = {
   epf: '🏛️',
 }
 
-export const AssetAllocationChart = ({ assetAllocation, loading = false }) => {
+// Memoized data transformation
+const transformAssetData = memoizeWithTTL((assetAllocation) => {
+  if (!assetAllocation) return []
+  
+  return Object.entries(assetAllocation)
+    .filter(([_, data]) => data.value > 0)
+    .map(([key, data]) => ({
+      name: ASSET_LABELS[key] || key,
+      value: data.value,
+      percentage: data.percentage,
+      color: ASSET_COLORS[key] || '#6b7280',
+      icon: ASSET_ICONS[key] || '📊',
+      key
+    }))
+    .sort((a, b) => b.value - a.value)
+}, 5000)
+
+export const AssetAllocationChart = memo(({ assetAllocation, loading = false }) => {
   const [animationComplete, setAnimationComplete] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState(null)
+
+  // Memoize expensive computations
+  const chartData = useMemo(() => transformAssetData(assetAllocation), [assetAllocation])
+  const totalValue = useMemo(() => 
+    chartData.reduce((sum, item) => sum + item.value, 0), [chartData]
+  )
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimationComplete(true), 500)
@@ -54,19 +78,6 @@ export const AssetAllocationChart = ({ assetAllocation, loading = false }) => {
       </div>
     )
   }
-
-  // Convert asset allocation data to chart format
-  const chartData = Object.entries(assetAllocation)
-    .filter(([_, data]) => data.value > 0)
-    .map(([key, data], index) => ({
-      name: ASSET_LABELS[key],
-      value: data.value,
-      percentage: data.percentage,
-      color: ASSET_COLORS[key],
-      icon: ASSET_ICONS[key],
-      key: key,
-      index: index,
-    }))
 
   if (chartData.length === 0) {
     return (
@@ -239,4 +250,7 @@ export const AssetAllocationChart = ({ assetAllocation, loading = false }) => {
       }))} />
     </div>
   )
-}
+})
+
+// Set display name for debugging
+AssetAllocationChart.displayName = 'AssetAllocationChart'
