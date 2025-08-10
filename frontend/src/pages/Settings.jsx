@@ -7,6 +7,7 @@ import { UserProfile } from '@/components/settings/UserProfile'
 import { AccountSettings } from '@/components/settings/AccountSettings'
 import { PreferencesSection } from '@/components/settings/PreferencesSection'
 import { ExportSection } from '@/components/settings/ExportSection'
+import { SyncSettings } from '@/components/settings/SyncSettings'
 import { GuidedTour } from '@/components/onboarding/GuidedTour'
 import { HelpCircle, Play } from 'lucide-react'
 
@@ -27,7 +28,7 @@ export function Settings() {
       <EmailVerificationStatus />
       
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="text-xs sm:text-sm">
             <span className="hidden sm:inline">Profile</span>
             <span className="sm:hidden">Profile</span>
@@ -35,6 +36,10 @@ export function Settings() {
           <TabsTrigger value="account" className="text-xs sm:text-sm">
             <span className="hidden sm:inline">Account & Security</span>
             <span className="sm:hidden">Account</span>
+          </TabsTrigger>
+          <TabsTrigger value="sync" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Auto-Sync</span>
+            <span className="sm:hidden">Sync</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="text-xs sm:text-sm">
             <span className="hidden sm:inline">Preferences</span>
@@ -48,6 +53,10 @@ export function Settings() {
         
         <TabsContent value="account" className="space-y-6">
           <AccountSettings />
+        </TabsContent>
+        
+        <TabsContent value="sync" className="space-y-6">
+          <SyncSettings />
         </TabsContent>
         
         <TabsContent value="preferences" className="space-y-6">

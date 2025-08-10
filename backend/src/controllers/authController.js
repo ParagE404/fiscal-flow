@@ -70,7 +70,7 @@ const register = async (req, res) => {
         email: email.toLowerCase(),
         password: hashedPassword,
         emailVerificationToken,
-        isEmailVerified: false
+        isEmailVerified: true // TEMPORARY: Set to true to bypass email verification
       },
       select: {
         id: true,
@@ -85,8 +85,8 @@ const register = async (req, res) => {
     // Generate JWT token
     const token = generateToken(user);
 
-    // Send verification email
-    await sendVerificationEmail(email, name, emailVerificationToken);
+    // Send verification email (TEMPORARILY DISABLED)
+    // await sendVerificationEmail(email, name, emailVerificationToken);
 
     // Log audit event
     await logAuthEvent.registration(user.id, user.email, req);

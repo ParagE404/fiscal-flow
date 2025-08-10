@@ -5,13 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Switch } from '@/components/ui/switch'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { mutualFundSchema } from '@/lib/validationSchemas'
 import { toast } from '@/lib/toast'
+import { RefreshCw, AlertCircle, Info } from 'lucide-react'
 
 const CATEGORIES = [
   'Large Cap',
@@ -42,11 +44,15 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
       riskLevel: '',
       rating: 1,
       investedAmount: 0,
-      currentValue: 0
+      currentValue: 0,
+      isin: '',
+      schemeCode: '',
+      enableAutoSync: false,
+      manualOverride: false
     }
   })
 
-  const { handleSubmit, reset, formState: { isSubmitting, errors }, watch } = form
+  const { handleSubmit, reset, formState: { isSubmitting }, watch } = form
 
   // Reset form when modal opens/closes or when editing fund changes
   useEffect(() => {
@@ -58,7 +64,11 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
           riskLevel: editingFund.riskLevel || '',
           rating: editingFund.rating || 1,
           investedAmount: editingFund.investedAmount || 0,
-          currentValue: editingFund.currentValue || 0
+          currentValue: editingFund.currentValue || 0,
+          isin: editingFund.isin || '',
+          schemeCode: editingFund.schemeCode || '',
+          enableAutoSync: editingFund.enableAutoSync || false,
+          manualOverride: editingFund.manualOverride || false
         })
       } else {
         reset({
@@ -67,7 +77,11 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
           riskLevel: '',
           rating: 1,
           investedAmount: 0,
-          currentValue: 0
+          currentValue: 0,
+          isin: '',
+          schemeCode: '',
+          enableAutoSync: false,
+          manualOverride: false
         })
       }
     }
@@ -81,7 +95,11 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
         riskLevel: data.riskLevel,
         rating: data.rating,
         investedAmount: data.investedAmount,
-        currentValue: data.currentValue
+        currentValue: data.currentValue,
+        isin: data.isin ? data.isin.trim().toUpperCase() : null,
+        schemeCode: data.schemeCode ? data.schemeCode.trim() : null,
+        enableAutoSync: data.enableAutoSync,
+        manualOverride: data.manualOverride
       }
 
       if (editingFund) {
@@ -267,6 +285,120 @@ export const AddFundModal = observer(({ open, onOpenChange, editingFund, onClose
                   </FormItem>
                 )}
               />
+            </div>
+
+            {/* Auto-Sync Configuration Section */}
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-blue-600" />
+                <h4 className="text-sm font-medium">Auto-Sync Configuration</h4>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="isin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ISIN Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., INF123456789"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          disabled={isSubmitting}
+                          maxLength={12}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-xs text-muted-foreground">
+                        Required for automatic NAV updates
+                      </p>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="schemeCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Scheme Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., 123456"
+                          {...field}
+                          disabled={isSubmitting}
+                          maxLength={10}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-xs text-muted-foreground">
+                        Alternative identifier for NAV matching
+                      </p>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="enableAutoSync"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Enable Auto-Sync</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Automatically update NAV and current value daily
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {watch('enableAutoSync') && (
+                <FormField
+                  control={form.control}
+                  name="manualOverride"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-amber-50 border-amber-200">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-amber-600" />
+                          Manual Override
+                        </FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Prevent automatic updates and keep manual values
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {!watch('isin') && !watch('schemeCode') && watch('enableAutoSync') && (
+                <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium">ISIN or Scheme Code Required</p>
+                    <p>Please provide either ISIN code or scheme code to enable automatic NAV updates from AMFI data feed.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter>

@@ -8,28 +8,32 @@ datasource db {
 }
 
 model User {
-  id                    String    @id @default(cuid())
-  email                 String    @unique
-  name                  String
-  password              String
-  avatar                String?
-  isEmailVerified       Boolean   @default(false)
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  name                   String
+  password               String
+  avatar                 String?
+  isEmailVerified        Boolean   @default(false)
   emailVerificationToken String?
-  passwordResetToken    String?
-  passwordResetExpires  DateTime?
-  loginAttempts         Int       @default(0)
-  lockUntil             DateTime?
-  lastLogin             DateTime?
-  preferences           Json?     @default("{}")
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  
-  mutualFunds   MutualFund[]
-  fixedDeposits FixedDeposit[]
-  epfAccounts   EPFAccount[]
-  stocks        Stock[]
-  sips          SIP[]
-  
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  loginAttempts          Int       @default(0)
+  lockUntil              DateTime?
+  lastLogin              DateTime?
+  preferences            Json?     @default("{}")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  mutualFunds          MutualFund[]
+  fixedDeposits        FixedDeposit[]
+  epfAccounts          EPFAccount[]
+  stocks               Stock[]
+  sips                 SIP[]
+  syncMetadata         SyncMetadata[]
+  syncConfigurations   SyncConfiguration[]
+  encryptedCredentials EncryptedCredentials[]
+  auditLogs            AuditLog[]
+
   @@index([email])
   @@index([emailVerificationToken])
   @@index([passwordResetToken])
@@ -37,24 +41,31 @@ model User {
 }
 
 model MutualFund {
-  id             String   @id @default(cuid())
-  userId         String
-  name           String
-  category       String
-  riskLevel      String
-  rating         Int
-  investedAmount Float    // Total lump sum investments
-  currentValue   Float    @default(0)
-  cagr           Float    @default(0)
-  sipInvestment  Float    @default(0) // Total SIP investments
-  totalInvestment Float   @default(0) // investedAmount + sipInvestment
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  id              String    @id @default(cuid())
+  userId          String
+  name            String
+  category        String
+  riskLevel       String
+  rating          Int
+  investedAmount  Float // Total lump sum investments
+  currentValue    Float     @default(0)
+  cagr            Float     @default(0)
+  sipInvestment   Float     @default(0) // Total SIP investments
+  totalInvestment Float     @default(0) // investedAmount + sipInvestment
+  isin            String? // For AMFI NAV matching
+  schemeCode      String? // Alternative identifier
+  lastSyncAt      DateTime?
+  syncStatus      String    @default("manual") // 'manual', 'synced', 'failed'
+  manualOverride  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   sips SIP[] // One-to-many relationship with SIPs
-  
+
   @@index([userId])
+  @@index([isin])
+  @@index([schemeCode])
   @@map("mutual_funds")
 }
 
@@ -62,7 +73,7 @@ model FixedDeposit {
   id             String   @id @default(cuid())
   userId         String
   bankName       String
-  customId       String?  // Optional custom identification (FD number, receipt number, etc.)
+  customId       String? // Optional custom identification (FD number, receipt number, etc.)
   interestRate   Float
   type           String
   payoutType     String   @default("Maturity") // Monthly, Quarterly, Half-yearly, Yearly, Maturity
@@ -74,9 +85,9 @@ model FixedDeposit {
   tenure         Int
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([maturityDate])
   @@index([customId])
@@ -96,18 +107,23 @@ model EPFAccount {
   monthlyContribution  Float
   startDate            DateTime
   endDate              DateTime?
+  uan                  String? // Universal Account Number
+  lastSyncAt           DateTime?
+  syncStatus           String    @default("manual")
+  manualOverride       Boolean   @default(false)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([status])
+  @@index([uan])
   @@map("epf_accounts")
 }
 
 model Stock {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String
   symbol         String
   companyName    String
@@ -115,27 +131,34 @@ model Stock {
   marketCap      String
   quantity       Int
   buyPrice       Float
-  currentPrice   Float    @default(0)
+  currentPrice   Float     @default(0)
   investedAmount Float
-  currentValue   Float    @default(0)
-  pnl            Float    @default(0)
-  pnlPercentage  Float    @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  currentValue   Float     @default(0)
+  pnl            Float     @default(0)
+  pnlPercentage  Float     @default(0)
+  exchange       String? // 'NSE', 'BSE'
+  isin           String? // For additional identification
+  lastSyncAt     DateTime?
+  syncStatus     String    @default("manual")
+  manualOverride Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([symbol])
   @@index([sector])
+  @@index([exchange, symbol])
+  @@index([isin])
   @@map("stocks")
 }
 
 model SIP {
   id                    String   @id @default(cuid())
   userId                String
-  mutualFundId          String?  // Optional - can be null for legacy SIPs
-  fundName              String   // Keep for backward compatibility and display
+  mutualFundId          String? // Optional - can be null for legacy SIPs
+  fundName              String // Keep for backward compatibility and display
   amount                Float
   frequency             String
   nextDueDate           DateTime
@@ -144,13 +167,136 @@ model SIP {
   status                String
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-  
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mutualFund  MutualFund? @relation(fields: [mutualFundId], references: [id], onDelete: SetNull)
-  
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mutualFund MutualFund? @relation(fields: [mutualFundId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([mutualFundId])
   @@index([nextDueDate])
   @@index([status])
   @@map("sips")
+}
+
+model SyncMetadata {
+  id             String    @id @default(cuid())
+  userId         String
+  investmentType String // 'mutual_funds', 'epf', 'stocks'
+  investmentId   String // Reference to specific investment
+  lastSyncAt     DateTime?
+  syncStatus     String // 'success', 'failed', 'in_progress', 'disabled'
+  syncSource     String // 'amfi', 'epfo', 'yahoo_finance', etc.
+  errorMessage   String?
+  dataHash       String? // For detecting changes
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, investmentType, investmentId])
+  @@index([userId, investmentType])
+  @@index([lastSyncAt])
+  @@index([syncStatus])
+  @@map("sync_metadata")
+}
+
+model SyncConfiguration {
+  id              String   @id @default(cuid())
+  userId          String
+  investmentType  String // 'mutual_funds', 'epf', 'stocks'
+  isEnabled       Boolean  @default(true)
+  syncFrequency   String // 'daily', 'hourly', 'monthly'
+  preferredSource String // Primary data source
+  fallbackSource  String? // Secondary data source
+  customSchedule  String? // Cron expression for custom timing
+  notifyOnSuccess Boolean  @default(false)
+  notifyOnFailure Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, investmentType])
+  @@index([userId])
+  @@index([isEnabled])
+  @@map("sync_configurations")
+}
+
+model EncryptedCredentials {
+  id            String   @id @default(cuid())
+  userId        String
+  service       String // 'epfo', 'yahoo_finance', etc.
+  encryptedData String // JSON with encrypted credentials
+  keyVersion    Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, service])
+  @@index([userId])
+  @@map("encrypted_credentials")
+}
+
+model JobConfiguration {
+  id          String   @id @default(cuid())
+  jobName     String   @unique
+  syncType    String // 'mutual_funds', 'epf', 'stocks'
+  schedule    String // Cron expression
+  timezone    String   @default("Asia/Kolkata")
+  enabled     Boolean  @default(true)
+  description String?
+  condition   String? // Serialized condition function
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([jobName])
+  @@index([syncType])
+  @@index([enabled])
+  @@map("job_configurations")
+}
+
+model JobExecution {
+  id              String   @id @default(cuid())
+  jobName         String
+  status          String // 'running', 'completed', 'failed'
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int? // Duration in milliseconds
+  usersProcessed  Int      @default(0)
+  recordsUpdated  Int      @default(0)
+  successCount    Int      @default(0)
+  errorCount      Int      @default(0)
+  errorMessage    String?
+  metadata        String? // JSON metadata
+  createdAt       DateTime @default(now())
+
+  @@index([jobName])
+  @@index([status])
+  @@index([startTime])
+  @@map("job_executions")
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  userId         String
+  auditType      String // 'sync_started', 'sync_completed', 'data_updated', etc.
+  investmentType String? // 'mutual_funds', 'epf', 'stocks'
+  investmentId   String? // Reference to specific investment
+  source         String? // Data source identifier
+  timestamp      DateTime @default(now())
+  details        Json // Detailed information about the operation
+  ipAddress      String? // IP address of the request
+  userAgent      String? // User agent string
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([auditType])
+  @@index([investmentType])
+  @@index([investmentId])
+  @@index([timestamp])
+  @@index([userId, investmentType, investmentId])
+  @@map("audit_logs")
 }

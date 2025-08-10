@@ -18,9 +18,16 @@ const epfRoutes = require('./routes/epf')
 const stocksRoutes = require('./routes/stocks')
 const sipsRoutes = require('./routes/sips')
 const exportRoutes = require('./routes/export')
+const syncRoutes = require('./routes/sync')
 
 const app = express()
 const prisma = new PrismaClient()
+
+// Import Job Scheduler
+const { JobScheduler } = require('./services/scheduler')
+
+// Initialize Job Scheduler
+const jobScheduler = new JobScheduler(prisma)
 
 // CORS configuration
 const corsOptions = {
@@ -62,6 +69,7 @@ app.use('/api/epf', epfRoutes)
 app.use('/api/stocks', stocksRoutes)
 app.use('/api/sips', sipsRoutes)
 app.use('/api/export', exportRoutes)
+app.use('/api/sync', syncRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -77,15 +85,27 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 
+// Start Job Scheduler
+async function startJobScheduler() {
+  try {
+    await jobScheduler.start()
+    console.log('✅ Job Scheduler started successfully')
+  } catch (error) {
+    console.error('❌ Failed to start Job Scheduler:', error)
+  }
+}
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down gracefully...')
+  jobScheduler.stop()
   await prisma.$disconnect()
   process.exit(0)
 })
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received, shutting down gracefully...')
+  jobScheduler.stop()
   await prisma.$disconnect()
   process.exit(0)
 })

@@ -18,9 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { portfolioStore } from '@/stores/PortfolioStore'
 import { toast } from 'sonner'
 import { INDIAN_SECTORS, MARKET_CAP_CATEGORIES, INDIAN_EXCHANGES, validateStockSymbol } from '@/lib/indianMarketContext'
+import { RefreshCw, AlertCircle, Info, TrendingUp, Clock } from 'lucide-react'
 
 const MARKET_CAPS = [
   'Large Cap',
@@ -43,6 +45,10 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
     quantity: '',
     buyPrice: '',
     currentPrice: '',
+    isin: '',
+    enableAutoSync: false,
+    manualOverride: false,
+    syncFrequency: 'hourly'
   })
   
   const [errors, setErrors] = useState({})
@@ -60,6 +66,10 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         quantity: editStock.quantity?.toString() || '',
         buyPrice: editStock.buyPrice?.toString() || '',
         currentPrice: editStock.currentPrice?.toString() || '',
+        isin: editStock.isin || '',
+        enableAutoSync: editStock.enableAutoSync || false,
+        manualOverride: editStock.manualOverride || false,
+        syncFrequency: editStock.syncFrequency || 'hourly'
       })
     } else {
       setFormData({
@@ -71,6 +81,10 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         quantity: '',
         buyPrice: '',
         currentPrice: '',
+        isin: '',
+        enableAutoSync: false,
+        manualOverride: false,
+        syncFrequency: 'hourly'
       })
     }
     setErrors({})
@@ -125,6 +139,14 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
       }
     }
 
+    // ISIN validation (optional but if provided should be valid)
+    if (formData.isin && formData.isin.trim()) {
+      const isinPattern = /^[A-Z]{2}[A-Z0-9]{10}$/
+      if (!isinPattern.test(formData.isin.trim().toUpperCase())) {
+        newErrors.isin = 'Invalid ISIN format. Expected format: IN1234567890'
+      }
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -149,6 +171,10 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
         buyPrice: parseFloat(formData.buyPrice),
         // If current price is not provided, use buy price
         currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : parseFloat(formData.buyPrice),
+        isin: formData.isin ? formData.isin.trim().toUpperCase() : null,
+        enableAutoSync: formData.enableAutoSync,
+        manualOverride: formData.manualOverride,
+        syncFrequency: formData.syncFrequency
       }
 
       if (editStock) {
@@ -374,17 +400,116 @@ const AddStockModal = observer(({ open, onClose, editStock = null }) => {
             </div>
           </div>
 
-          {/* Live Price Indicator */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-blue-700 font-medium">
-                Live prices integration coming soon
-              </span>
+          {/* Auto-Sync Configuration Section */}
+          <div className="space-y-4 border-t pt-4">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-blue-600" />
+              <h4 className="text-sm font-medium">Auto-Sync Configuration</h4>
             </div>
-            <p className="text-xs text-blue-600 mt-1">
-              Currently using manual price entry. Live price updates will be available in future versions.
-            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="isin">ISIN Code</Label>
+              <Input
+                id="isin"
+                placeholder="e.g., INE002A01018"
+                value={formData.isin}
+                onChange={(e) => handleInputChange('isin', e.target.value.toUpperCase())}
+                className={errors.isin ? 'border-red-500' : ''}
+                maxLength={12}
+              />
+              {errors.isin && (
+                <p className="text-sm text-red-500">{errors.isin}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                International Securities Identification Number for additional validation
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label className="text-base">Enable Auto-Sync</Label>
+                <div className="text-sm text-muted-foreground">
+                  Automatically update stock prices during market hours
+                </div>
+              </div>
+              <Switch
+                checked={formData.enableAutoSync}
+                onCheckedChange={(checked) => handleInputChange('enableAutoSync', checked)}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {formData.enableAutoSync && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="syncFrequency">Sync Frequency</Label>
+                  <Select
+                    value={formData.syncFrequency}
+                    onValueChange={(value) => handleInputChange('syncFrequency', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Hourly (During Market Hours)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="daily">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Daily (End of Day)
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Market hours: 9:15 AM - 3:30 PM IST
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-amber-50 border-amber-200">
+                  <div className="space-y-0.5">
+                    <Label className="text-base flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      Manual Override
+                    </Label>
+                    <div className="text-sm text-muted-foreground">
+                      Prevent automatic updates and keep manual prices
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.manualOverride}
+                    onCheckedChange={(checked) => handleInputChange('manualOverride', checked)}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <Info className="h-4 w-4 text-green-600 mt-0.5" />
+                  <div className="text-sm text-green-700">
+                    <p className="font-medium">Price Data Sources</p>
+                    <p>Prices will be fetched from Yahoo Finance and NSE APIs. Symbol validation against {formData.exchange} listings will be performed.</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!formData.enableAutoSync && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-blue-700 font-medium">
+                    Manual Price Entry Mode
+                  </span>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  Enable auto-sync to get automatic price updates during market hours.
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
