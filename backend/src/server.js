@@ -18,7 +18,7 @@ const epfRoutes = require('./routes/epf')
 const stocksRoutes = require('./routes/stocks')
 const sipsRoutes = require('./routes/sips')
 const exportRoutes = require('./routes/export')
-const syncRoutes = require('./routes/sync')
+const syncRoutes = require('./routes/sync-fixed')
 
 const app = express()
 const prisma = new PrismaClient()
@@ -29,11 +29,14 @@ const { JobScheduler } = require('./services/scheduler')
 // Initialize Job Scheduler
 const jobScheduler = new JobScheduler(prisma)
 
-// CORS configuration
+// CORS configuration - Temporarily very permissive for debugging
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: true, // Allow all origins temporarily
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+  allowedHeaders: ['*'],
+  exposedHeaders: ['*']
 }
 
 // Middleware

@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const { authenticateToken, requireEmailVerification } = require('../middleware/auth');
 const { secureCredentialEndpoint } = require('../middleware/httpsOnly');
 const syncController = require('../controllers/syncController');
+console.log('🔧 SyncController imported:', typeof syncController, !!syncController.storeCredentials);
 
 const router = express.Router();
 
@@ -69,6 +70,16 @@ router.post('/:type', syncLimiter, async (req, res) => {
 });
 
 /**
+ * Get sync status for all investment types
+ * GET /api/sync/status
+ * 
+ * Returns current sync status for all investment types
+ */
+router.get('/status', async (req, res) => {
+  await syncController.getAllSyncStatus(req, res);
+});
+
+/**
  * Get sync status and history for a specific investment type
  * GET /api/sync/:type/status
  * 
@@ -115,6 +126,14 @@ router.put('/config', configLimiter, async (req, res) => {
 // Credential Management API Endpoints
 
 /**
+ * Get credential status for all services
+ * GET /api/sync/credentials/status
+ */
+router.get('/credentials/status', async (req, res) => {
+  await syncController.getAllCredentialStatus(req, res);
+});
+
+/**
  * Check if credentials exist for a service
  * GET /api/sync/credentials/:service/status
  */
@@ -136,6 +155,9 @@ router.get('/credentials/:service/status', async (req, res) => {
  * - alpha_vantage: { apiKey: string }
  */
 router.post('/credentials/:service', ...secureCredentialEndpoint, credentialLimiter, async (req, res) => {
+  console.log(`🔐 CREDENTIALS ROUTE: POST /credentials/${req.params.service} from ${req.ip}`);
+  console.log(`🔐 User ID: ${req.user?.id}`);
+  console.log(`🔐 Request body keys:`, Object.keys(req.body));
   await syncController.storeCredentials(req, res);
 });
 
@@ -217,6 +239,24 @@ router.post('/sources/:source/reset', async (req, res) => {
  */
 router.get('/recovery/stats', async (req, res) => {
   await syncController.getRecoveryStatistics(req, res);
+});
+
+// Notification Settings
+
+/**
+ * Get notification settings
+ * GET /api/sync/notifications/settings
+ */
+router.get('/notifications/settings', async (req, res) => {
+  await syncController.getNotificationSettings(req, res);
+});
+
+/**
+ * Update notification settings
+ * PUT /api/sync/notifications/settings
+ */
+router.put('/notifications/settings', configLimiter, async (req, res) => {
+  await syncController.updateNotificationSettings(req, res);
 });
 
 // Health check endpoint for sync services
