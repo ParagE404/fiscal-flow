@@ -1,0 +1,275 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FinVista Auto-Sync Overview",
+    "tags": ["finvista", "sync", "overview"],
+    "timezone": "Asia/Kolkata",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Sync Job Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sync:job_success_rate_1h",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Active Sync Jobs",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sync_active_jobs_count",
+            "legendFormat": "Active Jobs"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Total Users with Sync Enabled",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sync:active_users_count",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Sync Jobs per Hour",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(sync_job_total[1h]) * 3600",
+            "legendFormat": "Jobs/Hour"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Sync Job Success Rate Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sync:job_success_rate_5m",
+            "legendFormat": "Overall Success Rate"
+          },
+          {
+            "expr": "sync:job_success_rate_5m{job_type=\"mutual_funds\"}",
+            "legendFormat": "Mutual Funds"
+          },
+          {
+            "expr": "sync:job_success_rate_5m{job_type=\"epf\"}",
+            "legendFormat": "EPF"
+          },
+          {
+            "expr": "sync:job_success_rate_5m{job_type=\"stocks\"}",
+            "legendFormat": "Stocks"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Sync Job Duration",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sync:job_duration_p50_5m",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "sync:job_duration_p95_5m",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "sync:job_duration_p99_5m",
+            "legendFormat": "p99"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "External API Response Times",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "external_api:response_time_p95_5m{instance=\"www.amfiindia.com\"}",
+            "legendFormat": "AMFI"
+          },
+          {
+            "expr": "external_api:response_time_p95_5m{instance=\"passbook.epfindia.gov.in\"}",
+            "legendFormat": "EPFO"
+          },
+          {
+            "expr": "external_api:response_time_p95_5m{instance=\"yahoo-finance15.p.rapidapi.com\"}",
+            "legendFormat": "Yahoo Finance"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Error Rate by Type",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(sync_errors_total[5m]) by (error_type)",
+            "legendFormat": "{{error_type}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 9,
+        "title": "Database Performance",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sync:db_query_duration_p95_5m",
+            "legendFormat": "Query Duration p95"
+          },
+          {
+            "expr": "sync:db_connection_pool_utilization * 100",
+            "legendFormat": "Connection Pool Utilization %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 10,
+        "title": "System Resources",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sync:memory_utilization",
+            "legendFormat": "Memory %"
+          },
+          {
+            "expr": "sync:cpu_utilization_5m",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "job_type",
+          "type": "query",
+          "query": "label_values(sync_job_total, job_type)",
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up{job=\"finvista-sync-worker\"}, instance)",
+          "multi": false,
+          "includeAll": false
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(sync_build_info[1h]) > 0",
+          "titleFormat": "Deployment",
+          "textFormat": "New version deployed"
+        }
+      ]
+    }
+  }
+}

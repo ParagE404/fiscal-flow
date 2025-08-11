@@ -1,0 +1,131 @@
+# Docker Compose configuration for Auto-Sync Integration
+# This extends the base docker-compose.yml with sync-specific services
+
+version: '3.8'
+
+services:
+  # Redis for job queuing (optional but recommended for production)
+  redis:
+    image: redis:7-alpine
+    container_name: finvista-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    command: >
+      sh -c "
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass $$REDIS_PASSWORD
+        else
+          redis-server
+        fi
+      "
+    volumes:
+      - redis_data:/data
+    networks:
+      - finvista-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sync Job Worker (separate container for background jobs)
+  sync-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.sync-worker
+    container_name: finvista-sync-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
+      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
+      - NSE_API_KEY=${NSE_API_KEY}
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+      - JOB_SCHEDULER_TIMEZONE=${JOB_SCHEDULER_TIMEZONE:-Asia/Kolkata}
+      - ENABLE_BACKGROUND_JOBS=true
+      - SYNC_ENABLED=true
+      - SYNC_JOB_CONCURRENCY=${SYNC_JOB_CONCURRENCY:-5}
+      - SYNC_LOG_LEVEL=${SYNC_LOG_LEVEL:-info}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - finvista-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+
+  # Metrics and Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: finvista-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - finvista-network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: finvista-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - finvista-network
+
+  # Log aggregation (optional)
+  loki:
+    image: grafana/loki:latest
+    container_name: finvista-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - finvista-network
+
+volumes:
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+
+networks:
+  finvista-network:
+    external: true

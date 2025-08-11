@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
+const KeyManagementService = require('../../security/KeyManagementService');
+const ApiSigningService = require('../../security/ApiSigningService');
 
 const prisma = new PrismaClient();
 
@@ -9,10 +11,15 @@ const prisma = new PrismaClient();
  */
 class CredentialService {
   constructor() {
-    this.algorithm = 'aes-256-cbc';
+    this.algorithm = 'aes-256-gcm'; // Upgraded to GCM for authenticated encryption
     this.keyLength = 32; // 256 bits
     this.ivLength = 16; // 128 bits
     this.saltLength = 32; // 256 bits
+    this.tagLength = 16; // 128 bits for GCM auth tag
+    
+    // Initialize enhanced security services
+    this.keyManager = new KeyManagementService();
+    this.apiSigner = new ApiSigningService();
     
     // Get encryption key from environment or generate one
     this.masterKey = this.getMasterKey();
@@ -20,6 +27,10 @@ class CredentialService {
     // Key rotation settings
     this.currentKeyVersion = parseInt(process.env.CREDENTIAL_KEY_VERSION) || 1;
     this.keyRotationInterval = 90 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
+    
+    // Security policies
+    this.maxFailedAttempts = 5;
+    this.lockoutDuration = 15 * 60 * 1000; // 15 minutes
   }
 
   /**
@@ -393,6 +404,286 @@ class CredentialService {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Enhanced encryption with authenticated encryption (AES-256-GCM)
+   * @param {Object} credentials - Credentials object to encrypt
+   * @param {number} keyVersion - Key version to use
+   * @returns {string} Encrypted credentials with authentication tag
+   * @private
+   */
+  encryptEnhanced(credentials, keyVersion = this.currentKeyVersion) {
+    try {
+      const plaintext = JSON.stringify(credentials);
+      const salt = crypto.randomBytes(this.saltLength);
+      const iv = crypto.randomBytes(this.ivLength);
+      const key = this.deriveKey(salt, keyVersion);
+      
+      const cipher = crypto.createCipher('aes-256-gcm', key);
+      cipher.setAAD(Buffer.from(`${keyVersion}:${Date.now()}`)); // Additional authenticated data
+      
+      let encrypted = cipher.update(plaintext, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+      
+      const authTag = cipher.getAuthTag();
+      
+      // Combine salt, iv, auth tag, and encrypted data
+      const combined = Buffer.concat([
+        salt,
+        iv,
+        authTag,
+        Buffer.from(encrypted, 'hex')
+      ]);
+      
+      return combined.toString('hex');
+    } catch (error) {
+      throw new Error(`Enhanced encryption failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Enhanced decryption with authentication verification
+   * @param {string} encryptedData - Encrypted data as hex string
+   * @param {number} keyVersion - Key version used for encryption
+   * @returns {Object} Decrypted credentials object
+   * @private
+   */
+  decryptEnhanced(encryptedData, keyVersion = this.currentKeyVersion) {
+    try {
+      const combined = Buffer.from(encryptedData, 'hex');
+      
+      // Extract components
+      const salt = combined.subarray(0, this.saltLength);
+      const iv = combined.subarray(this.saltLength, this.saltLength + this.ivLength);
+      const authTag = combined.subarray(
+        this.saltLength + this.ivLength, 
+        this.saltLength + this.ivLength + this.tagLength
+      );
+      const encrypted = combined.subarray(this.saltLength + this.ivLength + this.tagLength);
+      
+      const key = this.deriveKey(salt, keyVersion);
+      
+      const decipher = crypto.createDecipher('aes-256-gcm', key);
+      decipher.setAAD(Buffer.from(`${keyVersion}:${Date.now()}`));
+      decipher.setAuthTag(authTag);
+      
+      let decrypted = decipher.update(encrypted, null, 'utf8');
+      decrypted += decipher.final('utf8');
+      
+      return JSON.parse(decrypted);
+    } catch (error) {
+      throw new Error(`Enhanced decryption failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Generate signed API request headers for external services
+   * @param {string} method - HTTP method
+   * @param {string} url - Request URL
+   * @param {string} body - Request body
+   * @param {Object} credentials - Service credentials
+   * @returns {Object} Headers with signature
+   */
+  generateSignedHeaders(method, url, body = '', credentials = {}) {
+    const baseHeaders = this.apiSigner.generateSignedHeaders(method, url, body);
+    
+    // Add service-specific authentication headers
+    if (credentials.apiKey) {
+      baseHeaders['Authorization'] = `Bearer ${credentials.apiKey}`;
+    }
+    
+    if (credentials.clientId && credentials.clientSecret) {
+      const auth = Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64');
+      baseHeaders['Authorization'] = `Basic ${auth}`;
+    }
+    
+    return baseHeaders;
+  }
+
+  /**
+   * Verify API request signature
+   * @param {Object} headers - Request headers
+   * @param {string} method - HTTP method
+   * @param {string} url - Request URL
+   * @param {string} body - Request body
+   * @returns {boolean} True if signature is valid
+   */
+  verifyRequestSignature(headers, method, url, body = '') {
+    const signature = headers['x-api-signature'];
+    const timestamp = parseInt(headers['x-api-timestamp']);
+    
+    if (!signature || !timestamp) {
+      return false;
+    }
+    
+    // Check timestamp validity (prevent replay attacks)
+    if (!this.apiSigner.validateTimestamp(timestamp)) {
+      return false;
+    }
+    
+    return this.apiSigner.verifyRequest(signature, method, url, body, timestamp);
+  }
+
+  /**
+   * Track failed credential access attempts
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @param {string} reason - Failure reason
+   * @returns {Promise<boolean>} True if account should be locked
+   */
+  async trackFailedAttempt(userId, service, reason) {
+    const key = `failed_attempts:${userId}:${service}`;
+    
+    // Get current failed attempts count
+    const attempts = await this.getFailedAttempts(userId, service);
+    const newAttempts = attempts + 1;
+    
+    // Store updated count with expiration
+    await this.setFailedAttempts(userId, service, newAttempts);
+    
+    // Log the failed attempt
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        auditType: 'credential_access_failed',
+        investmentType: null,
+        investmentId: null,
+        source: service,
+        details: {
+          reason,
+          attemptCount: newAttempts,
+          timestamp: new Date().toISOString()
+        },
+        ipAddress: null, // Would be populated from request context
+        userAgent: null
+      }
+    });
+    
+    // Check if account should be locked
+    if (newAttempts >= this.maxFailedAttempts) {
+      await this.lockAccount(userId, service);
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Get failed attempts count for user/service
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @returns {Promise<number>} Failed attempts count
+   */
+  async getFailedAttempts(userId, service) {
+    // This would typically use Redis or similar cache
+    // For now, use database
+    const recent = await prisma.auditLog.count({
+      where: {
+        userId,
+        auditType: 'credential_access_failed',
+        source: service,
+        timestamp: {
+          gte: new Date(Date.now() - this.lockoutDuration)
+        }
+      }
+    });
+    
+    return recent;
+  }
+
+  /**
+   * Set failed attempts count
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @param {number} count - Attempts count
+   * @returns {Promise<void>}
+   */
+  async setFailedAttempts(userId, service, count) {
+    // Implementation would depend on caching solution
+    // For now, this is handled by the audit log
+  }
+
+  /**
+   * Lock account for specific service
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @returns {Promise<void>}
+   */
+  async lockAccount(userId, service) {
+    const lockUntil = new Date(Date.now() + this.lockoutDuration);
+    
+    // Create lock record
+    await prisma.accountLock.create({
+      data: {
+        userId,
+        service,
+        lockedAt: new Date(),
+        lockUntil,
+        reason: 'Too many failed credential access attempts'
+      }
+    });
+    
+    // Log the lockout
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        auditType: 'account_locked',
+        source: service,
+        details: {
+          reason: 'Excessive failed attempts',
+          lockUntil: lockUntil.toISOString()
+        }
+      }
+    });
+  }
+
+  /**
+   * Check if account is locked for specific service
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @returns {Promise<boolean>} True if account is locked
+   */
+  async isAccountLocked(userId, service) {
+    const lock = await prisma.accountLock.findFirst({
+      where: {
+        userId,
+        service,
+        lockUntil: {
+          gt: new Date()
+        }
+      }
+    });
+    
+    return !!lock;
+  }
+
+  /**
+   * Clear failed attempts after successful access
+   * @param {string} userId - User ID
+   * @param {string} service - Service identifier
+   * @returns {Promise<void>}
+   */
+  async clearFailedAttempts(userId, service) {
+    // Remove any existing locks
+    await prisma.accountLock.deleteMany({
+      where: {
+        userId,
+        service
+      }
+    });
+    
+    // Log successful access
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        auditType: 'credential_access_success',
+        source: service,
+        details: {
+          timestamp: new Date().toISOString()
+        }
+      }
+    });
   }
 }
 
