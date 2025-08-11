@@ -150,7 +150,7 @@ export function NotificationSettings() {
 
   const loadNotificationSettings = async () => {
     try {
-      const response = await apiClient.get('/api/sync/notifications/settings')
+      const response = await apiClient.get('/sync/notifications/settings')
       setSettings(response.data)
       setLoading(false)
     } catch (error) {
@@ -212,7 +212,7 @@ export function NotificationSettings() {
     setSaving(true)
     try {
       const updatedSettings = { ...settings, ...updates }
-      const response = await apiClient.put('/api/sync/notifications/settings', updatedSettings)
+      const response = await apiClient.put('/sync/notifications/settings', updatedSettings)
       setSettings(response.data)
       toast.success('Notification settings updated')
     } catch (error) {

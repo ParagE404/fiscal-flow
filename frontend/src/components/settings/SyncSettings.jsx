@@ -93,7 +93,7 @@ export function SyncSettings() {
 
   const loadSyncConfigurations = async () => {
     try {
-      const response = await apiClient.get('/api/sync/config')
+      const response = await apiClient.get('/sync/config')
       const configMap = {}
       response.data.forEach(config => {
         configMap[config.investmentType] = config
@@ -107,7 +107,7 @@ export function SyncSettings() {
 
   const loadCredentialStatus = async () => {
     try {
-      const response = await apiClient.get('/api/sync/credentials/status')
+      const response = await apiClient.get('/sync/credentials/status')
       setCredentials(response.data)
     } catch (error) {
       console.error('Failed to load credential status:', error)
@@ -116,7 +116,7 @@ export function SyncSettings() {
 
   const loadSyncStatus = async () => {
     try {
-      const response = await apiClient.get('/api/sync/status')
+      const response = await apiClient.get('/sync/status')
       const statusMap = {}
       response.data.forEach(status => {
         statusMap[status.investmentType] = status
@@ -143,7 +143,7 @@ export function SyncSettings() {
 
       const updatedConfig = { ...currentConfig, ...updates }
       
-      const response = await apiClient.put('/api/sync/config', updatedConfig)
+      const response = await apiClient.put('/sync/config', updatedConfig)
       
       setConfigurations(prev => ({
         ...prev,
@@ -163,7 +163,7 @@ export function SyncSettings() {
     try {
       toast.info(`Starting ${INVESTMENT_TYPES.find(t => t.key === investmentType)?.label} sync...`)
       
-      const response = await apiClient.post(`/api/sync/${investmentType}`)
+      const response = await apiClient.post(`/sync/${investmentType}`)
       
       if (response.data.success) {
         toast.success(`${INVESTMENT_TYPES.find(t => t.key === investmentType)?.label} sync completed successfully`)

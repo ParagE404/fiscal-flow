@@ -97,7 +97,7 @@ export function CredentialManagement() {
 
   const loadCredentialStatus = async () => {
     try {
-      const response = await apiClient.get('/api/sync/credentials/status')
+      const response = await apiClient.get('/sync/credentials/status')
       setCredentials(response.data)
       setLoading(false)
     } catch (error) {
@@ -139,7 +139,9 @@ export function CredentialManagement() {
 
     setSaving(true)
     try {
-      await apiClient.post(`/api/sync/credentials/${editingService}`, formData)
+      await apiClient.post(`/sync/credentials/${editingService}`, {
+        credentials: formData
+      })
       
       setCredentials(prev => ({
         ...prev,
@@ -162,7 +164,7 @@ export function CredentialManagement() {
     if (!service) return
 
     try {
-      await apiClient.delete(`/api/sync/credentials/${serviceKey}`)
+      await apiClient.delete(`/sync/credentials/${serviceKey}`)
       
       setCredentials(prev => ({
         ...prev,
