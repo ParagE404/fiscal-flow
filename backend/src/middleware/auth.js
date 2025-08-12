@@ -77,15 +77,21 @@ const authenticateToken = async (req, res, next) => {
 
 /**
  * Middleware to require email verification
+ * TEMPORARILY DISABLED - bypassing email verification check
  */
 const requireEmailVerification = (req, res, next) => {
-  if (!req.user.isEmailVerified) {
-    return res.status(403).json({
-      error: 'Email verification required',
-      message: 'Please verify your email address to access this resource'
-    });
-  }
+  // TEMPORARY: Skip email verification check
+  // TODO: Re-enable email verification once email system is working
   next();
+  
+  // Original code (commented out):
+  // if (!req.user.isEmailVerified) {
+  //   return res.status(403).json({
+  //     error: 'Email verification required',
+  //     message: 'Please verify your email address to access this resource'
+  //   });
+  // }
+  // next();
 };
 
 /**

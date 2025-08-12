@@ -1,0 +1,47 @@
+# Dockerfile for Sync Worker Service
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Set timezone
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S syncworker -u 1001
+
+# Change ownership of app directory
+RUN chown -R syncworker:nodejs /app
+USER syncworker
+
+# Health check script
+COPY --chown=syncworker:nodejs healthcheck.js .
+
+# Expose metrics port
+EXPOSE 9090
+
+# Start sync worker
+CMD ["node", "src/workers/syncWorker.js"]

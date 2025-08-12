@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar, Building2, Hash, DollarSign, CreditCard } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Calendar, Building2, Hash, DollarSign, CreditCard, RefreshCw, AlertCircle, Info, Key } from 'lucide-react'
 import { validatePFNumber, validateUAN, EPF_CONSTANTS } from '@/lib/indianMarketContext'
 
 export const AddEPFModal = ({ 
@@ -33,7 +34,10 @@ export const AddEPFModal = ({
     monthlyContribution: '',
     contributionRate: '12',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    enableAutoSync: false,
+    manualOverride: false,
+    syncFrequency: 'monthly'
   })
 
   const [errors, setErrors] = useState({})
@@ -54,7 +58,10 @@ export const AddEPFModal = ({
           monthlyContribution: editingEPF.monthlyContribution?.toString() || '',
           contributionRate: editingEPF.contributionRate?.toString() || '12',
           startDate: editingEPF.startDate ? new Date(editingEPF.startDate).toISOString().split('T')[0] : '',
-          endDate: editingEPF.endDate ? new Date(editingEPF.endDate).toISOString().split('T')[0] : ''
+          endDate: editingEPF.endDate ? new Date(editingEPF.endDate).toISOString().split('T')[0] : '',
+          enableAutoSync: editingEPF.enableAutoSync || false,
+          manualOverride: editingEPF.manualOverride || false,
+          syncFrequency: editingEPF.syncFrequency || 'monthly'
         })
       } else {
         setFormData({
@@ -69,7 +76,10 @@ export const AddEPFModal = ({
           monthlyContribution: '',
           contributionRate: '12',
           startDate: '',
-          endDate: ''
+          endDate: '',
+          enableAutoSync: false,
+          manualOverride: false,
+          syncFrequency: 'monthly'
         })
       }
       setErrors({})
@@ -105,8 +115,10 @@ export const AddEPFModal = ({
       newErrors.pfNumber = 'Invalid PF number format. Expected format: XX/XXX/0000000/000/0000000'
     }
 
-    // UAN validation (optional but if provided should be valid)
-    if (formData.uan && formData.uan.trim() && !validateUAN(formData.uan.trim())) {
+    // UAN validation (optional but if provided should be valid, required if auto-sync enabled)
+    if (formData.enableAutoSync && (!formData.uan || !formData.uan.trim())) {
+      newErrors.uan = 'UAN is required when auto-sync is enabled'
+    } else if (formData.uan && formData.uan.trim() && !validateUAN(formData.uan.trim())) {
       newErrors.uan = 'UAN must be a 12-digit number'
     }
 
@@ -172,7 +184,10 @@ export const AddEPFModal = ({
       startDate: new Date(formData.startDate).toISOString(),
       endDate: formData.endDate && formData.status === 'Transferred' 
         ? new Date(formData.endDate).toISOString() 
-        : null
+        : null,
+      enableAutoSync: formData.enableAutoSync,
+      manualOverride: formData.manualOverride,
+      syncFrequency: formData.syncFrequency
     }
 
     try {
@@ -196,7 +211,10 @@ export const AddEPFModal = ({
       monthlyContribution: '',
       contributionRate: '12',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      enableAutoSync: false,
+      manualOverride: false,
+      syncFrequency: 'monthly'
     })
     setErrors({})
     onClose()
@@ -480,6 +498,98 @@ export const AddEPFModal = ({
                   <p className="text-sm text-destructive">{errors.pensionFund}</p>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Auto-Sync Configuration Section */}
+          <div className="space-y-4 border-t pt-4">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-blue-600" />
+              <h4 className="text-sm font-medium">Auto-Sync Configuration</h4>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Enable Auto-Sync</Label>
+                  <div className="text-sm text-muted-foreground">
+                    Automatically update EPF balance from EPFO portal
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.enableAutoSync}
+                  onCheckedChange={(checked) => handleInputChange('enableAutoSync', checked)}
+                  disabled={loading}
+                />
+              </div>
+
+              {formData.enableAutoSync && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="syncFrequency">Sync Frequency</Label>
+                    <Select 
+                      value={formData.syncFrequency} 
+                      onValueChange={(value) => handleInputChange('syncFrequency', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            Monthly (Recommended)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="quarterly">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            Quarterly
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Monthly sync runs on the 1st of each month
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-amber-50 border-amber-200">
+                    <div className="space-y-0.5">
+                      <Label className="text-base flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                        Manual Override
+                      </Label>
+                      <div className="text-sm text-muted-foreground">
+                        Prevent automatic updates and keep manual values
+                      </div>
+                    </div>
+                    <Switch
+                      checked={formData.manualOverride}
+                      onCheckedChange={(checked) => handleInputChange('manualOverride', checked)}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {!formData.uan && (
+                    <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <div className="text-sm text-blue-700">
+                        <p className="font-medium">UAN Required for Auto-Sync</p>
+                        <p>Please provide your UAN (Universal Account Number) to enable automatic balance updates from EPFO portal.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <Key className="h-4 w-4 text-orange-600 mt-0.5" />
+                    <div className="text-sm text-orange-700">
+                      <p className="font-medium">EPFO Credentials Required</p>
+                      <p>You'll need to configure your EPFO portal credentials in Settings → Sync Settings to enable automatic updates.</p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

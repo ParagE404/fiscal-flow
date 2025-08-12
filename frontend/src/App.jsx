@@ -2,9 +2,9 @@ import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { UserProvider } from './contexts/UserContext'
-import { initializeAccessibility } from './lib/accessibility'
-import { initializePerformanceOptimizations } from './lib/performance'
-import { initializePerformanceMonitoring } from './lib/performance/bundleOptimization.jsx'
+// import { initializeAccessibility } from './lib/accessibility'
+// import { initializePerformanceOptimizations } from './lib/performance'
+// import { initializePerformanceMonitoring } from './lib/performance/bundleOptimization.jsx'
 import { Layout } from './components/layout/Layout'
 import { ProtectedRoute, EmailVerifiedRoute, PublicOnlyRoute } from './components/auth/ProtectedRoute'
 import { LoadingSpinner } from './components/ui/loading-spinner'
@@ -37,9 +37,9 @@ function App() {
 
   // Initialize accessibility and performance optimizations
   useEffect(() => {
-    initializeAccessibility()
-    initializePerformanceOptimizations()
-    initializePerformanceMonitoring()
+    // initializeAccessibility()
+    // initializePerformanceOptimizations()
+    // initializePerformanceMonitoring()
   }, [])
 
   return (

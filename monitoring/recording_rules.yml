@@ -1,0 +1,113 @@
+# Prometheus Recording Rules for FinVista Auto-Sync
+
+groups:
+  - name: finvista-sync-recording-rules
+    interval: 30s
+    rules:
+      # Sync Job Success Rates
+      - record: sync:job_success_rate_5m
+        expr: rate(sync_job_success_total[5m]) / rate(sync_job_total[5m])
+
+      - record: sync:job_success_rate_1h
+        expr: rate(sync_job_success_total[1h]) / rate(sync_job_total[1h])
+
+      - record: sync:job_success_rate_24h
+        expr: rate(sync_job_success_total[24h]) / rate(sync_job_total[24h])
+
+      # Sync Job Duration Percentiles
+      - record: sync:job_duration_p50_5m
+        expr: histogram_quantile(0.50, rate(sync_job_duration_seconds_bucket[5m]))
+
+      - record: sync:job_duration_p95_5m
+        expr: histogram_quantile(0.95, rate(sync_job_duration_seconds_bucket[5m]))
+
+      - record: sync:job_duration_p99_5m
+        expr: histogram_quantile(0.99, rate(sync_job_duration_seconds_bucket[5m]))
+
+      # API Response Time Percentiles
+      - record: sync:api_response_time_p50_5m
+        expr: histogram_quantile(0.50, rate(sync_api_request_duration_seconds_bucket[5m]))
+
+      - record: sync:api_response_time_p95_5m
+        expr: histogram_quantile(0.95, rate(sync_api_request_duration_seconds_bucket[5m]))
+
+      - record: sync:api_response_time_p99_5m
+        expr: histogram_quantile(0.99, rate(sync_api_request_duration_seconds_bucket[5m]))
+
+      # Error Rates
+      - record: sync:error_rate_5m
+        expr: rate(sync_errors_total[5m])
+
+      - record: sync:error_rate_1h
+        expr: rate(sync_errors_total[1h])
+
+      # Database Query Performance
+      - record: sync:db_query_duration_p95_5m
+        expr: histogram_quantile(0.95, rate(sync_database_query_duration_seconds_bucket[5m]))
+
+      - record: sync:db_connection_pool_utilization
+        expr: sync_database_connections_active / sync_database_connections_max
+
+      # Resource Utilization
+      - record: sync:memory_utilization
+        expr: (sync_memory_used_bytes / sync_memory_limit_bytes) * 100
+
+      - record: sync:cpu_utilization_5m
+        expr: rate(sync_cpu_usage_seconds_total[5m]) * 100
+
+      # Business Metrics
+      - record: sync:active_users_count
+        expr: count(count by (user_id) (sync_job_total))
+
+      - record: sync:total_investments_synced_1h
+        expr: sum(increase(sync_records_updated_total[1h]))
+
+      - record: sync:avg_sync_frequency_per_user
+        expr: avg(sync_job_total) by (user_id)
+
+  - name: finvista-system-recording-rules
+    interval: 60s
+    rules:
+      # System Resource Utilization
+      - record: system:memory_utilization
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+      - record: system:cpu_utilization_5m
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      - record: system:disk_utilization
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100
+
+      # Network Metrics
+      - record: system:network_receive_rate_5m
+        expr: rate(node_network_receive_bytes_total[5m])
+
+      - record: system:network_transmit_rate_5m
+        expr: rate(node_network_transmit_bytes_total[5m])
+
+  - name: finvista-external-api-recording-rules
+    interval: 60s
+    rules:
+      # External API Availability
+      - record: external_api:availability_5m
+        expr: avg_over_time(probe_success[5m])
+
+      - record: external_api:availability_1h
+        expr: avg_over_time(probe_success[1h])
+
+      - record: external_api:availability_24h
+        expr: avg_over_time(probe_success[24h])
+
+      # External API Response Times
+      - record: external_api:response_time_p50_5m
+        expr: histogram_quantile(0.50, rate(probe_duration_seconds_bucket[5m]))
+
+      - record: external_api:response_time_p95_5m
+        expr: histogram_quantile(0.95, rate(probe_duration_seconds_bucket[5m]))
+
+      # API Rate Limit Metrics
+      - record: external_api:rate_limit_usage_rate_5m
+        expr: rate(sync_api_requests_total[5m])
+
+      - record: external_api:rate_limit_exceeded_rate_5m
+        expr: rate(sync_api_rate_limit_exceeded_total[5m])

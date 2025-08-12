@@ -1,0 +1,214 @@
+# Prometheus Alert Rules for FinVista Auto-Sync
+
+groups:
+  - name: finvista-sync-alerts
+    rules:
+      # Sync Job Failures
+      - alert: SyncJobFailureRate
+        expr: rate(sync_job_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: sync
+        annotations:
+          summary: "High sync job failure rate detected"
+          description: "Sync job failure rate is {{ $value }} failures per second for the last 5 minutes"
+
+      - alert: SyncJobStuck
+        expr: time() - sync_job_last_success_timestamp > 7200  # 2 hours
+        for: 5m
+        labels:
+          severity: critical
+          service: sync
+        annotations:
+          summary: "Sync job appears to be stuck"
+          description: "No successful sync job completion for {{ $labels.job_type }} in the last 2 hours"
+
+      - alert: SyncWorkerDown
+        expr: up{job="finvista-sync-worker"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: sync
+        annotations:
+          summary: "Sync worker is down"
+          description: "The sync worker service is not responding"
+
+      # Database Issues
+      - alert: DatabaseConnectionFailure
+        expr: sync_database_connection_errors_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database connection failures detected"
+          description: "Sync service is experiencing database connection issues"
+
+      - alert: HighDatabaseLatency
+        expr: sync_database_query_duration_seconds{quantile="0.95"} > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database query latency"
+          description: "95th percentile database query latency is {{ $value }}s"
+
+      # External API Issues
+      - alert: ExternalAPIDown
+        expr: probe_success{job="external-apis"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: external-api
+        annotations:
+          summary: "External API is down"
+          description: "{{ $labels.instance }} is not responding to health checks"
+
+      - alert: ExternalAPIHighLatency
+        expr: probe_duration_seconds{job="external-apis"} > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: external-api
+        annotations:
+          summary: "High external API latency"
+          description: "{{ $labels.instance }} response time is {{ $value }}s"
+
+      - alert: APIRateLimitExceeded
+        expr: rate(sync_api_rate_limit_exceeded_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: external-api
+        annotations:
+          summary: "API rate limit exceeded"
+          description: "Rate limit exceeded for {{ $labels.api_provider }} - {{ $value }} times per second"
+
+      # System Resource Issues
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90% ({{ $value | humanizePercentage }})"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80% ({{ $value | humanizePercentage }})"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% on {{ $labels.mountpoint }}"
+
+      # Redis Issues
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis service is not responding"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is above 90%"
+
+      # Sync Performance Issues
+      - alert: SyncJobDurationHigh
+        expr: sync_job_duration_seconds{quantile="0.95"} > 300  # 5 minutes
+        for: 10m
+        labels:
+          severity: warning
+          service: sync
+        annotations:
+          summary: "Sync job taking too long"
+          description: "95th percentile sync job duration is {{ $value }}s for {{ $labels.job_type }}"
+
+      - alert: SyncDataValidationFailures
+        expr: rate(sync_data_validation_failures_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: sync
+        annotations:
+          summary: "High data validation failure rate"
+          description: "Data validation failure rate is {{ $value }} per second"
+
+      # Security Alerts
+      - alert: CredentialDecryptionFailures
+        expr: rate(sync_credential_decryption_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "Credential decryption failures"
+          description: "Credential decryption is failing - possible security issue"
+
+      - alert: UnauthorizedSyncAttempts
+        expr: rate(sync_unauthorized_attempts_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Unauthorized sync attempts detected"
+          description: "{{ $value }} unauthorized sync attempts per second"
+
+  - name: finvista-business-alerts
+    rules:
+      # Business Logic Alerts
+      - alert: NoSyncActivityForUsers
+        expr: sync_active_users_count == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No sync activity for any users"
+          description: "No users have active sync configurations or recent sync activity"
+
+      - alert: SyncSuccessRateLow
+        expr: (rate(sync_job_success_total[1h]) / rate(sync_job_total[1h])) < 0.8
+        for: 15m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "Low sync success rate"
+          description: "Sync success rate is {{ $value | humanizePercentage }} over the last hour"
+
+      - alert: UserCredentialExpirationSoon
+        expr: sync_user_credentials_expiring_count > 0
+        for: 1h
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "User credentials expiring soon"
+          description: "{{ $value }} users have credentials expiring within 7 days"
