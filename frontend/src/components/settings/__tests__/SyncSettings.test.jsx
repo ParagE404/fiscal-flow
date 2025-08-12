@@ -91,7 +91,7 @@ describe('SyncSettings', () => {
     })
     
     // The modal should be visible (though we're not testing the full modal content here)
-    expect(screen.getByText('Credential Management')).toBeInTheDocument()
+    expect(screen.getAllByText('Credential Management')).toHaveLength(3)
   })
 
   it('handles sync configuration updates', async () => {
@@ -114,7 +114,7 @@ describe('SyncSettings', () => {
     })
 
     await waitFor(() => {
-      expect(apiClient.put).toHaveBeenCalledWith('/api/sync/config', expect.any(Object))
+      expect(apiClient.put).toHaveBeenCalledWith('/sync/config', expect.any(Object))
     })
   })
 
@@ -137,7 +137,7 @@ describe('SyncSettings', () => {
     })
 
     await waitFor(() => {
-      expect(apiClient.post).toHaveBeenCalledWith('/api/sync/mutual_funds')
+      expect(apiClient.post).toHaveBeenCalledWith('/sync/mutual_funds')
     })
   })
 })

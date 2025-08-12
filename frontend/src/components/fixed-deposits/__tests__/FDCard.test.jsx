@@ -5,6 +5,7 @@ import { FDCard } from '../FDCard'
 
 // Mock the utils
 vi.mock('@/lib/utils', () => ({
+  cn: (...classes) => classes.filter(Boolean).join(' '),
   formatCurrency: (amount) => `₹${amount.toLocaleString('en-IN')}`,
   formatPercentage: (percentage) => `${percentage.toFixed(2)}%`,
   getValueColor: (value) => value > 0 ? 'text-success-600' : value < 0 ? 'text-destructive-600' : 'text-muted-foreground'
@@ -45,11 +46,11 @@ describe('FDCard', () => {
     )
 
     expect(screen.getByText('HDFC Bank')).toBeInTheDocument()
-    expect(screen.getByText('Simple Interest')).toBeInTheDocument()
-    expect(screen.getByText('6.50% p.a.')).toBeInTheDocument()
-    expect(screen.getByText('₹100,000')).toBeInTheDocument()
-    expect(screen.getByText('₹105,000')).toBeInTheDocument()
-    expect(screen.getByText('₹110,000')).toBeInTheDocument()
+    expect(screen.getByText(/Simple Interest/)).toBeInTheDocument()
+    expect(screen.getByText(/6\.50% p\.a\./)).toBeInTheDocument()
+    expect(screen.getByText('₹1,00,000')).toBeInTheDocument()
+    expect(screen.getByText('₹1,05,000')).toBeInTheDocument()
+    expect(screen.getByText('₹1,10,000')).toBeInTheDocument()
     expect(screen.getByText('₹5,000')).toBeInTheDocument()
     expect(screen.getByText('180 days left')).toBeInTheDocument()
   })
@@ -57,7 +58,8 @@ describe('FDCard', () => {
   test('shows loading state correctly', () => {
     render(<FDCard loading={true} />)
     
-    expect(screen.getByTestId('fd-card-loading') || document.querySelector('.animate-pulse')).toBeInTheDocument()
+    // Check for loading state by looking for shimmer elements
+    expect(document.querySelector('.shimmer')).toBeInTheDocument()
   })
 
   test('calls onEdit when edit button is clicked', () => {
@@ -69,7 +71,12 @@ describe('FDCard', () => {
       />
     )
 
-    const editButton = screen.getByRole('button', { name: /edit/i })
+    // Find the edit button by looking for the edit icon
+    const buttons = screen.getAllByRole('button')
+    const editButton = buttons.find(button => 
+      button.querySelector('svg.lucide-square-pen')
+    )
+    
     fireEvent.click(editButton)
 
     expect(mockOnEdit).toHaveBeenCalledWith(mockFD)
@@ -84,7 +91,12 @@ describe('FDCard', () => {
       />
     )
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i })
+    // Find the delete button by looking for the trash icon
+    const buttons = screen.getAllByRole('button')
+    const deleteButton = buttons.find(button => 
+      button.querySelector('svg.lucide-trash2')
+    )
+    
     fireEvent.click(deleteButton)
 
     expect(mockOnDelete).toHaveBeenCalledWith(mockFD)
@@ -105,7 +117,7 @@ describe('FDCard', () => {
       />
     )
 
-    expect(screen.getByText('Matured')).toBeInTheDocument()
+    expect(screen.getAllByText('Matured')).toHaveLength(2)
   })
 
   test('shows maturing soon status for FDs maturing soon', () => {

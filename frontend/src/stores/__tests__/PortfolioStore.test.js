@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest'
-import { PortfolioStore } from '../PortfolioStore'
+import { portfolioStore } from '../PortfolioStore'
 import { apiClient } from '../../lib/apiClient'
 
 // Mock the API client
@@ -9,7 +9,30 @@ describe('ProtfolioStore', () => {
   let store
 
   beforeEach(() => {
-    store = new PortfolioStore()
+    store = portfolioStore
+    // Reset store state
+    store.mutualFunds = []
+    store.mutualFundsSummary = {}
+    store.sips = []
+    store.fixedDeposits = []
+    store.epfAccounts = []
+    store.stocks = []
+    store.loading = {
+      dashboard: false,
+      mutualFunds: false,
+      sips: false,
+      fixedDeposits: false,
+      epf: false,
+      stocks: false,
+    }
+    store.error = {
+      dashboard: null,
+      mutualFunds: null,
+      sips: null,
+      fixedDeposits: null,
+      epf: null,
+      stocks: null,
+    }
     vi.clearAllMocks()
     console.error = vi.fn()
   })
@@ -312,9 +335,14 @@ describe('ProtfolioStore', () => {
 
     test('should handle refresh all data error', async () => {
       const error = new Error('Refresh failed')
+      // Mock all API methods to reject since refreshAllData calls multiple methods
       apiClient.getMutualFunds.mockRejectedValue(error)
+      apiClient.getSIPs.mockRejectedValue(error)
+      apiClient.getFixedDeposits.mockRejectedValue(error)
+      apiClient.getEPFAccounts.mockRejectedValue(error)
+      apiClient.getStocks.mockRejectedValue(error)
 
-      await expect(store.refreshAllData()).rejects.toThrow('Refresh failed')
+      await expect(store.refreshAllData(true)).rejects.toThrow('Refresh failed')
 
       expect(store.loading.dashboard).toBe(false)
       expect(store.error.dashboard).toBe('Refresh failed')

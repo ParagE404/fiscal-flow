@@ -71,7 +71,8 @@ describe('TopPerformers', () => {
   test('displays empty state when no performers', () => {
     render(<TopPerformers topPerformers={[]} loading={false} />)
     
-    expect(screen.getByText('No investments found. Add some investments to see top performers.')).toBeInTheDocument()
+    expect(screen.getByText('No top performers yet')).toBeInTheDocument()
+    expect(screen.getByText('Add some investments to see your best performers')).toBeInTheDocument()
   })
 
   test('applies correct color coding for gains and losses', () => {
