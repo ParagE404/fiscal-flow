@@ -106,9 +106,9 @@ class AuthStore {
 
   async initializeUserPreferences() {
     try {
-      // Import preferencesStore dynamically to avoid circular dependency
-      const { preferencesStore } = await import('./PreferencesStore')
-      await preferencesStore.initialize()
+      // We'll initialize preferences from the StoreContext instead
+      // This avoids circular dependency issues
+      window.dispatchEvent(new CustomEvent('auth:initialize-preferences'))
     } catch (error) {
       console.error('Failed to initialize user preferences:', error)
     }

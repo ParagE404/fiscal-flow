@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
 import { portfolioStore } from './PortfolioStore'
 import { uiStore } from './UIStore'
 import { authStore } from './AuthStore'
@@ -14,6 +14,23 @@ const StoreContext = createContext({
 
 // Store provider component
 export function StoreProvider({ children }) {
+  useEffect(() => {
+    // Listen for preferences initialization request from AuthStore
+    const handleInitializePreferences = async () => {
+      try {
+        await preferencesStore.initialize()
+      } catch (error) {
+        console.error('Failed to initialize user preferences:', error)
+      }
+    }
+
+    window.addEventListener('auth:initialize-preferences', handleInitializePreferences)
+    
+    return () => {
+      window.removeEventListener('auth:initialize-preferences', handleInitializePreferences)
+    }
+  }, [])
+
   return (
     <StoreContext.Provider value={{ portfolioStore, uiStore, authStore, preferencesStore }}>
       {children}
