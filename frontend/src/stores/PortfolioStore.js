@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { apiClient } from "../lib/apiClient.js";
+import { apiClient } from "../lib/apiClient";
 
 class PortfolioStore {
   // Observable state

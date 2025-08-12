@@ -1,4 +1,4 @@
-import { apiClient } from '../lib/apiClient.js'
+import { apiClient } from '../lib/apiClient'
 import { portfolioStore } from '../stores/PortfolioStore'
 
 /**

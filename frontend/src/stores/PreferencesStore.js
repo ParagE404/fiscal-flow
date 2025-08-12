@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { apiClient } from '../lib/apiClient.js'
+import { apiClient } from "../lib/apiClient";
 
 class PreferencesStore {
   // Preferences state
@@ -50,7 +50,7 @@ class PreferencesStore {
       this.loading = true;
       this.error = null;
 
-      const response = await apiClient.getUserPreferences()
+      const response = await apiClient.getUserPreferences();
 
       runInAction(() => {
         this.preferences = response.preferences;
@@ -77,7 +77,7 @@ class PreferencesStore {
       this.loading = true;
       this.error = null;
 
-      const response = await apiClient.updateUserPreferences(updates)
+      const response = await apiClient.updateUserPreferences(updates);
 
       runInAction(() => {
         this.preferences = response.preferences;
@@ -105,7 +105,7 @@ class PreferencesStore {
       this.loading = true;
       this.error = null;
 
-      const response = await apiClient.resetUserPreferences()
+      const response = await apiClient.resetUserPreferences();
 
       runInAction(() => {
         this.preferences = response.preferences;

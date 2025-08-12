@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
 import { usePortfolioStore } from '../stores/StoreContext'
-import { dataSyncService } from '../lib/dataSyncService.js'
+import { dataSyncService } from '../lib/dataSyncService'
 
 /**
  * Custom hook for managing data synchronization in components
