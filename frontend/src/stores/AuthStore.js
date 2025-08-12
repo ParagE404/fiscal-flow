@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import { apiClient } from '../lib/apiClient'
+import { apiClient } from '../lib/apiClient.js'
 
 class AuthStore {
   user = null
