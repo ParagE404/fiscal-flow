@@ -13,6 +13,11 @@ class AuthStore {
   constructor() {
     makeAutoObservable(this)
     this.initializeAuth()
+    
+    // Listen for token expiration events from apiClient
+    window.addEventListener('auth:token-expired', () => {
+      this.clearAuth()
+    })
   }
 
   async initializeAuth() {
