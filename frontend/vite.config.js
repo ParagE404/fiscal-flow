@@ -16,14 +16,15 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          mobx: ['mobx', 'mobx-react-lite'],
-        }
-      }
-    }
+          vendor: ["react", "react-dom", "react-router-dom"],
+          mobx: ["mobx", "mobx-react-lite"],
+        },
+      },
+    },
   },
   preview: {
     port: 4173,
+    host: '0.0.0.0',
     strictPort: false,
   },
 });
