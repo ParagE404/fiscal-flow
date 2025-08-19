@@ -39,6 +39,28 @@ A comprehensive personal finance management platform built with React and Node.j
 - **Rate Limiting**: API rate limiting for security and performance
 - **Background Jobs**: Automated sync jobs with Redis queue management
 
+## 📸 Screenshots
+
+### Dashboard Overview
+![Dashboard](screenshots/dashboard.png)
+*Main dashboard showing portfolio overview with investment summary and performance metrics*
+
+### Investment Portfolio
+![Portfolio](screenshots/portfolio.png)
+*Detailed portfolio view with mutual funds, stocks, and FD tracking*
+
+### SIP Management
+![SIP Management](screenshots/sip-management.png)
+*SIP tracking interface with current values and performance analytics*
+
+### Auto-Sync Configuration
+![Sync Config](screenshots/sync-config.png)
+*Auto-sync settings panel for configuring data source preferences and frequencies*
+
+### Mobile Responsive Design
+![Mobile View](screenshots/mobile-view.png)
+*Mobile-optimized interface showing responsive design across devices*
+
 ## 🏗️ Architecture
 
 ### Backend Stack
