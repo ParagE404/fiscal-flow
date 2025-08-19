@@ -39,6 +39,28 @@ A comprehensive personal finance management platform built with React and Node.j
 - **Rate Limiting**: API rate limiting for security and performance
 - **Background Jobs**: Automated sync jobs with Redis queue management
 
+## 📸 Screenshots
+
+### Dashboard Overview
+![Dashboard](screenshots/dashboard.png)
+*Main dashboard showing portfolio overview with investment summary and performance metrics*
+
+### Investment Portfolio
+![Portfolio](screenshots/portfolio.png)
+*Detailed portfolio view with mutual funds, stocks, and FD tracking*
+
+### SIP Management
+![SIP Management](screenshots/sip-management.png)
+*SIP tracking interface with current values and performance analytics*
+
+### Auto-Sync Configuration
+![Sync Config](screenshots/sync-config.png)
+*Auto-sync settings panel for configuring data source preferences and frequencies*
+
+### Mobile Responsive Design
+![Mobile View](screenshots/mobile-view.png)
+*Mobile-optimized interface showing responsive design across devices*
+
 ## 🏗️ Architecture
 
 ### Backend Stack
@@ -204,13 +226,6 @@ npm run test:coverage
 npm run test:integration
 ```
 
-## 📊 Monitoring
-
-Access monitoring dashboards:
-- **Grafana**: http://localhost:3000 (admin/admin)
-- **Prometheus**: http://localhost:9090
-- **Application**: http://localhost:5173
-
 ## 🔒 Security Features
 
 ### Data Protection
@@ -248,25 +263,5 @@ Access monitoring dashboards:
 - Update documentation for API changes
 - Use conventional commit messages
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Radix UI](https://www.radix-ui.com/) for accessible components
-- [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
-- [Recharts](https://recharts.org/) for beautiful charts
-- [Prisma](https://www.prisma.io/) for database management
-- [AMFI](https://www.amfiindia.com/) for mutual fund data
-
-## 📞 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Email: support@fiscalflow.com
-- Documentation: [Project Wiki](https://github.com/yourusername/fiscalflow/wiki)
-
 ---
 
-**FiscalFlow** - Take control of your financial future with intelligent portfolio management and automated investment tracking.
